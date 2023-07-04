@@ -22,12 +22,13 @@
 #include <sl_priv.h>
 
 #define COUNTER_EEPROM_ADD 0x01
-
+#define COUNTERTWO_EEPROM_ADD 0x02
 volatile uint32_t u32SystemTimer_1ms = 0;
 uint32_t nowtime_ms;
 uint32_t u32move_forward_waiting_ms = 0;
 uint32_t u32move_backward_waiting_ms = 0;
 volatile uint32_t u32TestCounter_new;
+volatile uint32_t u32TestCounterTwo_new;
 boolean bl_tick_move_forward_time = false;
 boolean bl_tick_move_backward_time = false;
 
@@ -1299,7 +1300,7 @@ void loadCountersFromEEPROM(void)
 {
 	uint8_t loadBufferArray = {0};
 	// Loads both main counters from same block address
-	TI_Fee_ReadSync(mainCounterAddress, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
+	TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
 	memcpy(mainCounterOne, loadBufferArray, 4U);	 // Extract first 4 bytes for mainCounterOne
 	memcpy(mainCounterTwo, loadBufferArray + 4, 4U); // Extract next 4 bytes for mainCounterTwo
 }
@@ -1309,7 +1310,7 @@ void saveCountersToEEPROM(void)
 	uint8_t writeBufferArray = {0};
 	memcpy(writeBufferArray, &mainCounterOne, 4U);
 	memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
-	TI_Fee_WriteSync(mainCounterAddress, (uint8_t *)writeBufferArray);
+	TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, (uint8_t *)writeBufferArray);
 }
 
 void SetMotorTwoDirection(uint32 dirB)
@@ -1331,11 +1332,11 @@ void main(void)
 
 	Init_all(); // Initialize all drivers//
 
-	if (0)
-	{
-		EEPROM_writeCounterData(220804, 220804, COUNTER_EEPROM_ADD); // 11 May 2023 16:04pm
-		vDelay_ticks(80000U);
-	}
+	// if (0)
+	// {
+	// 	EEPROM_writeCounterData(220804, 220804, COUNTER_EEPROM_ADD); // 11 May 2023 16:04pm
+	// 	vDelay_ticks(80000U);
+	// }
 	// EEPROM_readData(0x01);//read data from EEPROM//
 	gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
 	gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
@@ -1356,21 +1357,21 @@ void main(void)
 	u32eeprom_timer_1ms = 0;
 	EEPROM_readCounterData(COUNTER_EEPROM_ADD, &u32TestCounter_new, &u32temp_ee_test);
 	vDelay_ticks(80000U);
-	if (u32TestCounter_new < u32temp_ee_test)
-	{
-		// u32TestCounter_new = u32temp_ee_test;
-	}
-	if (0)
-	{
-		if (u32TestCounter > u32temp_ee_test)
-		{
-			// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-		}
-		else if (u32TestCounter_new < u32temp_ee_test)
-		{
-			// EEPROM_writeCounterData(u32temp_ee_test, u32temp_ee_test, COUNTER_EEPROM_ADD);
-		}
-	}
+	// if (u32TestCounter_new < u32temp_ee_test)
+	// {
+	// 	// u32TestCounter_new = u32temp_ee_test;
+	// }
+	// if (0)
+	// {
+	// 	if (u32TestCounter > u32temp_ee_test)
+	// 	{
+	// 		// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+	// 	}
+	// 	else if (u32TestCounter_new < u32temp_ee_test)
+	// 	{
+	// 		// EEPROM_writeCounterData(u32temp_ee_test, u32temp_ee_test, COUNTER_EEPROM_ADD);
+	// 	}
+	// }
 
 	switch_on_cntr = 0;
 	switch_off_cntr = 0;
@@ -1478,13 +1479,14 @@ void main(void)
 				max_pos_flag = false;
 			}
 		}
+		/***************************************************Start of Motor One code***************************************************/
 		else
 		{
 			// adc_convert();//get adc value for PWM duty cycle & battery //
 			// blflag_speed_check = false;
 			if (flag_switch_on)
 			{
-				if (!flag_motor_error)
+				if (!flag_motor_error) // If no motor error
 				{
 					if (motor_forward)
 					{
@@ -1514,7 +1516,7 @@ void main(void)
 						{
 							Motor_move_backward_pulse();
 						}
-						else
+						else // max position reached, set flag for next cycle
 						{
 							if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
 							{
@@ -1576,6 +1578,7 @@ void main(void)
 			}
 		}
 	}
+	/***************************************************End of Motor One code***************************************************/
 
 	if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
 	{

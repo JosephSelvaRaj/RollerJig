@@ -1307,6 +1307,8 @@ void Motor_move_backward_pulse(void)
 //	}
 //
 // }
+
+/********************************************START OF MOTOR TWO FUNCTION DEFINITIONS*********************************************/
 void loadCountersFromEEPROM(void)
 {
 	// uint8_t loadBufferArray = {0};
@@ -1334,6 +1336,7 @@ void SetMotorTwoSpeed(uint32 spdB)
 	pwmSetDuty(hetRAM1, pwm0, spdB);
 }
 
+/********************************************END OF MOTOR TWO FUNCTION DEFINITIONS*********************************************/
 //////**********************End of Initialization***********************/////
 
 // uint32_t u32TestCntr = 0;

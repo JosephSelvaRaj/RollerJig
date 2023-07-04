@@ -159,6 +159,13 @@ boolean blflag_reset = false;
 boolean blfag_stop_reset = false;
 uint32_t u32Retry_cntr = 0;
 uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
+
+// Motor Two Pins
+#define MOTORTWOENCODERPIN 5U
+#define MOTORTWODIRPIN 7U
+#define MOTORTWOPWMPIN 19U
+
+
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
 {
 	sprintf(au8DispStr, "Motor Pulse Count = %5u, Test Count = %9u\r\n", var01, var02);
@@ -1298,19 +1305,19 @@ void Motor_move_backward_pulse(void)
 // }
 void loadCountersFromEEPROM(void)
 {
-	uint8_t loadBufferArray = {0};
+	//uint8_t loadBufferArray = {0};
 	// Loads both main counters from same block address
-	TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
-	memcpy(mainCounterOne, loadBufferArray, 4U);	 // Extract first 4 bytes for mainCounterOne
-	memcpy(mainCounterTwo, loadBufferArray + 4, 4U); // Extract next 4 bytes for mainCounterTwo
+	TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, 0U, &u32TestCounterTwo_new, 4U);
+	//memcpy(mainCounterOne, loadBufferArray, 4U);	 // Extract first 4 bytes for mainCounterOne
+	//memcpy(u32TestCounterTwo_new, loadBufferArray + 4, 4U); // Extract next 4 bytes for u32TestCounterTwo_new
 }
 
 void saveCountersToEEPROM(void)
 {
-	uint8_t writeBufferArray = {0};
-	memcpy(writeBufferArray, &mainCounterOne, 4U);
-	memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
-	TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, (uint8_t *)writeBufferArray);
+	//uint8_t writeBufferArray = {0};
+	//memcpy(writeBufferArray, &mainCounterOne, 4U);
+	//memcpy(writeBufferArray + 4, &u32TestCounterTwo_new, 4U);
+	TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, &u32TestCounterTwo_new);
 }
 
 void SetMotorTwoDirection(uint32 dirB)

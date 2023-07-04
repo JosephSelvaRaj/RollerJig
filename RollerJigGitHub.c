@@ -22,13 +22,12 @@
 #include <sl_priv.h>
 
 #define COUNTER_EEPROM_ADD 0x01
-#define COUNTERTWO_EEPROM_ADD 0x02
+
 volatile uint32_t u32SystemTimer_1ms = 0;
 uint32_t nowtime_ms;
 uint32_t u32move_forward_waiting_ms = 0;
 uint32_t u32move_backward_waiting_ms = 0;
 volatile uint32_t u32TestCounter_new;
-volatile uint32_t u32TestCounterTwo_new;
 boolean bl_tick_move_forward_time = false;
 boolean bl_tick_move_backward_time = false;
 
@@ -160,12 +159,17 @@ boolean blfag_stop_reset = false;
 uint32_t u32Retry_cntr = 0;
 uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 
+//**********************************MOTOR TWO VARIABLES**********************************//
+#define COUNTERTWO_EEPROM_ADD 0x02
+
 // Motor Two Pins
 #define MOTORTWOENCODERPIN 5U
 #define MOTORTWODIRPIN 7U
 #define MOTORTWOPWMPIN 19U
 
+volatile uint32_t u32TestCounterTwo_new;
 
+//**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
 {
 	sprintf(au8DispStr, "Motor Pulse Count = %5u, Test Count = %9u\r\n", var01, var02);
@@ -1305,18 +1309,18 @@ void Motor_move_backward_pulse(void)
 // }
 void loadCountersFromEEPROM(void)
 {
-	//uint8_t loadBufferArray = {0};
-	// Loads both main counters from same block address
+	// uint8_t loadBufferArray = {0};
+	//  Loads both main counters from same block address
 	TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, 0U, &u32TestCounterTwo_new, 4U);
-	//memcpy(mainCounterOne, loadBufferArray, 4U);	 // Extract first 4 bytes for mainCounterOne
-	//memcpy(u32TestCounterTwo_new, loadBufferArray + 4, 4U); // Extract next 4 bytes for u32TestCounterTwo_new
+	// memcpy(mainCounterOne, loadBufferArray, 4U);	 // Extract first 4 bytes for mainCounterOne
+	// memcpy(u32TestCounterTwo_new, loadBufferArray + 4, 4U); // Extract next 4 bytes for u32TestCounterTwo_new
 }
 
 void saveCountersToEEPROM(void)
 {
-	//uint8_t writeBufferArray = {0};
-	//memcpy(writeBufferArray, &mainCounterOne, 4U);
-	//memcpy(writeBufferArray + 4, &u32TestCounterTwo_new, 4U);
+	// uint8_t writeBufferArray = {0};
+	// memcpy(writeBufferArray, &mainCounterOne, 4U);
+	// memcpy(writeBufferArray + 4, &u32TestCounterTwo_new, 4U);
 	TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, &u32TestCounterTwo_new);
 }
 

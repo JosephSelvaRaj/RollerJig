@@ -1146,6 +1146,8 @@ void Motor_move_backward_pulse(void)
 	}
 }
 
+
+
 // void Motor_move_forward_torque(void)
 //{
 //	static boolean first_run = true;
@@ -1295,7 +1297,22 @@ void Motor_move_backward_pulse(void)
 //	}
 //
 // }
+void loadCountersFromEEPROM(void)
+{
+    uint8_t loadBufferArray = {0};
+    //Loads both main counters from same block address
+    TI_Fee_ReadSync(mainCounterAddress, mainCounterAddressOffset, (uint8_t*)loadBufferArray, mainCountersTotalByteSize);
+    memcpy(mainCounterOne, loadBufferArray, 4U);    //Extract first 4 bytes for mainCounterOne
+    memcpy(mainCounterTwo, loadBufferArray+4, 4U);  //Extract next 4 bytes for mainCounterTwo
+}
 
+void saveCountersToEEPROM(void)
+{
+    uint8_t writeBufferArray = {0};
+    memcpy(writeBufferArray, &mainCounterOne, 4U);
+    memcpy(writeBufferArray+4, &mainCounterTwo, 4U);
+    TI_Fee_WriteSync(mainCounterAddress, (uint8_t*)writeBufferArray);
+}
 //////**********************End of Initialization***********************/////
 
 // uint32_t u32TestCntr = 0;

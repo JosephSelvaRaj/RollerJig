@@ -166,8 +166,8 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define MOTORTWOENCODERPIN 5U
 #define MOTORTWODIRPIN 7U
 #define MOTORTWOPWMPIN 19U
-#define FORWARD 0U
-#define BACKWARD 1U
+#define FORWARD 1U
+#define BACKWARD 0U
 
 volatile uint32_t u32TestCounterTwo_new = 0;
 volatile uint32_t encoderTwoCounter = 0;
@@ -177,6 +177,8 @@ boolean	flag_motorTwo_stop = false;
 boolean flag_motorTwo_backward = false;
 boolean flag_motorTwo_error = false;
 boolean max_pos_flagTwo = false;
+boolean bl_tick_move_forward_timeTwo = false;
+boolean bl_tick_move_backward_timeTwo = false;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
@@ -650,153 +652,153 @@ void Motor_Stop()
 {
 	pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
 }
-void Motor_move_forward_OpenLoop(void) // Not used
-{
-	static boolean first_run = true;
-	if (first_run)
-	{
-		nowtime_ms = u32GetTime_ms();
-		first_run = false;
-	}
-	// move forward
-	gioSetBit(gioPORTA, 3, PIN_HIGH); // set pin 3 output as 1//
-	flag_motor_forward = true;
-	flag_motor_stop = false;
+// void Motor_move_forward_OpenLoop(void) // Not used
+// {
+// 	static boolean first_run = true;
+// 	if (first_run)
+// 	{
+// 		nowtime_ms = u32GetTime_ms();
+// 		first_run = false;
+// 	}
+// 	// move forward
+// 	gioSetBit(gioPORTA, 3, PIN_HIGH); // set pin 3 output as 1//
+// 	flag_motor_forward = true;
+// 	flag_motor_stop = false;
 
-	uint8_t time_index = 0;
-	uint32_t u32Temp_ms = 0;
-	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
+// 	uint8_t time_index = 0;
+// 	uint32_t u32Temp_ms = 0;
+// 	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
 
-	// ramp up region
-	if (u32TimePast_ms <= RAMP_UP_DURATION_MS)
-	{
-		time_index = (uint8_t)(u32TimePast_ms * 0.02);
-		// float fldelta = (MOTOR_DUTYCYCLE_RAMP_MAX - MOTOR_DUTYCYCLE_RAMP_MIN) *50U / RAMP_UP_DURATION_MS;
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_RAMP_MAX - 2 * time_index); // set duty cycle to individual //
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
-	{
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
-		// only check motor speed here
-		if ((u32TimePast_ms > (RAMP_UP_DURATION_MS + 1000U)) && !blflag_speed_check) // only after 1000ms starts check
-		{
-			if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-			{
-				flag_motor_error = true;
-			}
-			blflag_speed_check = true; // check no issue
-		}
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
-	{
-		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
-		time_index = (uint8_t)(u32Temp_ms * 0.02);
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED); // set duty cycle to individual //
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
-	{
-		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
-		time_index = (uint8_t)(u32Temp_ms * 0.02);
-		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - time_index));//set duty cycle to 0//
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to 0//
-	}
-	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
-	{
-		pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-		flag_motor_stop = true;
-		if (u32TimePast_ms > (WHOLE_WAITING_TIME_MS - 100U)) // only check during last 100ms
-		{
-			if (u32motor_rotate_pulse_cntr < MAX_MOTOR_PULSE_COUNT) // motor stuck error or no power
-			{
-				// flag_motor_error = true;
-			}
-		}
-	}
-	else
-	{
-		// waiting period finish, should start next cycle
+// 	// ramp up region
+// 	if (u32TimePast_ms <= RAMP_UP_DURATION_MS)
+// 	{
+// 		time_index = (uint8_t)(u32TimePast_ms * 0.02);
+// 		// float fldelta = (MOTOR_DUTYCYCLE_RAMP_MAX - MOTOR_DUTYCYCLE_RAMP_MIN) *50U / RAMP_UP_DURATION_MS;
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_RAMP_MAX - 2 * time_index); // set duty cycle to individual //
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
+// 		// only check motor speed here
+// 		if ((u32TimePast_ms > (RAMP_UP_DURATION_MS + 1000U)) && !blflag_speed_check) // only after 1000ms starts check
+// 		{
+// 			if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+// 			{
+// 				flag_motor_error = true;
+// 			}
+// 			blflag_speed_check = true; // check no issue
+// 		}
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
+// 		time_index = (uint8_t)(u32Temp_ms * 0.02);
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED); // set duty cycle to individual //
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
+// 		time_index = (uint8_t)(u32Temp_ms * 0.02);
+// 		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - time_index));//set duty cycle to 0//
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to 0//
+// 	}
+// 	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+// 		flag_motor_stop = true;
+// 		if (u32TimePast_ms > (WHOLE_WAITING_TIME_MS - 100U)) // only check during last 100ms
+// 		{
+// 			if (u32motor_rotate_pulse_cntr < MAX_MOTOR_PULSE_COUNT) // motor stuck error or no power
+// 			{
+// 				// flag_motor_error = true;
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		// waiting period finish, should start next cycle
 
-		nowtime_ms = u32GetTime_ms();
-		max_pos_flag = true;
-		flag_motor_stop = true;
-		updateLED_flag = true;
-		motor_forward = false;
-		blflag_speed_check = false; // prepare for next check
-	}
-}
-void Motor_move_backward_OpenLoop(void) // Not used
-{
+// 		nowtime_ms = u32GetTime_ms();
+// 		max_pos_flag = true;
+// 		flag_motor_stop = true;
+// 		updateLED_flag = true;
+// 		motor_forward = false;
+// 		blflag_speed_check = false; // prepare for next check
+// 	}
+// }
+// void Motor_move_backward_OpenLoop(void) // Not used
+// {
 
-	// move backward
-	gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
-	flag_motor_forward = false;
-	flag_motor_stop = false;
-	uint8_t time_index = 0;
-	uint32_t u32Temp_ms = 0;
-	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
+// 	// move backward
+// 	gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
+// 	flag_motor_forward = false;
+// 	flag_motor_stop = false;
+// 	uint8_t time_index = 0;
+// 	uint32_t u32Temp_ms = 0;
+// 	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
 
-	// ramp up region
-	if (u32TimePast_ms <= RAMP_UP_DURATION_MS)
-	{
-		time_index = (uint8_t)(u32TimePast_ms * 0.02);
-		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - 2 * time_index)); // set duty cycle to individual //
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
-	{
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
-		// only check motor speed here
-		if ((u32TimePast_ms > (RAMP_UP_DURATION_MS + 1000U)) && !blflag_speed_check) // only after 1000ms starts check
-		{
-			if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-			{
-				flag_motor_error = true;
-			}
-			blflag_speed_check = true; // check no issue
-		}
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
-	{
-		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
-		time_index = (uint8_t)(u32Temp_ms * 0.02);
-		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - time_index));//set duty cycle to individual //
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
-	}
-	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
-	{
-		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
-		time_index = (uint8_t)(u32Temp_ms * 0.02);
-		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - time_index));//set duty cycle to 0//
-		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to 0//
-	}
-	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
-	{
-		pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-		flag_motor_stop = true;
-		if (u32TimePast_ms > (WHOLE_WAITING_TIME_MS - 100U)) // only check during last 100ms
-		{
-			if (u32motor_rotate_pulse_cntr > MIN_MOTOR_PULSE_COUNT) // motor stuck error or no power
-			{
-				// flag_motor_error = true;
-			}
-		}
-	}
-	else
-	{
-		// waiting period finish, should start next cycle
-		// flag_motor_backword = true;
+// 	// ramp up region
+// 	if (u32TimePast_ms <= RAMP_UP_DURATION_MS)
+// 	{
+// 		time_index = (uint8_t)(u32TimePast_ms * 0.02);
+// 		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - 2 * time_index)); // set duty cycle to individual //
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
+// 		// only check motor speed here
+// 		if ((u32TimePast_ms > (RAMP_UP_DURATION_MS + 1000U)) && !blflag_speed_check) // only after 1000ms starts check
+// 		{
+// 			if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+// 			{
+// 				flag_motor_error = true;
+// 			}
+// 			blflag_speed_check = true; // check no issue
+// 		}
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
+// 		time_index = (uint8_t)(u32Temp_ms * 0.02);
+// 		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - time_index));//set duty cycle to individual //
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_CONST_SPEED);
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
+// 		time_index = (uint8_t)(u32Temp_ms * 0.02);
+// 		// pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - time_index));//set duty cycle to 0//
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to 0//
+// 	}
+// 	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+// 		flag_motor_stop = true;
+// 		if (u32TimePast_ms > (WHOLE_WAITING_TIME_MS - 100U)) // only check during last 100ms
+// 		{
+// 			if (u32motor_rotate_pulse_cntr > MIN_MOTOR_PULSE_COUNT) // motor stuck error or no power
+// 			{
+// 				// flag_motor_error = true;
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		// waiting period finish, should start next cycle
+// 		// flag_motor_backword = true;
 
-		nowtime_ms = u32GetTime_ms();
-		// if(!flag_motor_error)
-		{
-			u32TestCounter++;
-			blflag_speed_check = false; // prepare for next speed check
-		}
+// 		nowtime_ms = u32GetTime_ms();
+// 		// if(!flag_motor_error)
+// 		{
+// 			u32TestCounter++;
+// 			blflag_speed_check = false; // prepare for next speed check
+// 		}
 
-		updateLED_flag = true;
-		flag_motor_stop = true;
-		motor_forward = true;
-	}
-}
+// 		updateLED_flag = true;
+// 		flag_motor_stop = true;
+// 		motor_forward = true;
+// 	}
+// }
 
 //// motor ramp up profile
 // void Motor_Move_Torque(uint8_t direction)
@@ -1347,10 +1349,10 @@ void Motor_move_forward_pulse(void)
 {
 	static boolean first_run = true;
 	static boolean wait_start = true;
-	if (bl_tick_move_forward_time)
+	if (bl_tick_move_forward_timeTwo)
 	{
 		nowtime_ms = u32GetTime_ms();
-		bl_tick_move_forward_time = false;
+		bl_tick_move_forward_timeTwo = false;
 		encoderTwoCounter = 0U;
 	}
     // move forward
@@ -1505,21 +1507,6 @@ void main(void)
 	u32eeprom_timer_1ms = 0;
 	EEPROM_readCounterData(COUNTER_EEPROM_ADD, &u32TestCounter_new, &u32temp_ee_test);
 	vDelay_ticks(80000U);
-	// if (u32TestCounter_new < u32temp_ee_test)
-	// {
-	// 	// u32TestCounter_new = u32temp_ee_test;
-	// }
-	// if (0)
-	// {
-	// 	if (u32TestCounter > u32temp_ee_test)
-	// 	{
-	// 		// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-	// 	}
-	// 	else if (u32TestCounter_new < u32temp_ee_test)
-	// 	{
-	// 		// EEPROM_writeCounterData(u32temp_ee_test, u32temp_ee_test, COUNTER_EEPROM_ADD);
-	// 	}
-	// }
 
 	switch_on_cntr = 0;
 	switch_off_cntr = 0;
@@ -1538,6 +1525,7 @@ void main(void)
 	blfag_stop_reset = false;
 	max_pos_flag = false;
 	bl_tick_move_forward_time = true;
+	bl_tick_move_forward_timeTwo = true;
 	bl_tick_move_backward_time = false;
 	i32EncPulse_cntr = 0;
 	while (1) // Loop to acquire and do the task//
@@ -1572,11 +1560,6 @@ void main(void)
 				{
 					// restart
 					u32ErrorHappen_cntr = 0;
-					// pwmSetDuty(hetRAM1, pwm1, 98);//most likely motor stuck here, need push motor
-					// EEPROM_writeCounterData(u32TestCounter, u32TestCounter, COUNTER_EEPROM_ADD);
-					// vDelay_ticks(80000U);
-					/* reset here */
-					// sl_systemREG1->SYSECR = ((uint32)0x2u << 14u);
 					blflag_reset = true;
 					flag_motor_error = false;
 					first_reset = true;
@@ -1797,7 +1780,7 @@ void main(void)
 										max_pos_flagTwo = false;
 										bl_tick_move_forward_time = true;
 										// nowtime_ms = u32GetTime_ms();
-										i32EncPulse_cntr = 0;
+										encoderTwoCounter = 0;
 										updateLED_flag = true;
 										if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
 										{

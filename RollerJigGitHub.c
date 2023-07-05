@@ -166,6 +166,9 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define MOTORTWOENCODERPIN 5U
 #define MOTORTWODIRPIN 7U
 #define MOTORTWOPWMPIN 19U
+#define FORWARD 0U
+#define BACKWARD 1U
+
 
 volatile uint32_t u32TestCounterTwo_new;
 boolean firstResetTwo = true;
@@ -1593,8 +1596,11 @@ void main(void)
 				}
 				else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
 				{
-					gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
-					pwmSetDuty(hetRAM1, pwm1, 90);	 // set duty cycle to 99//
+					SetMotorTwoDirection(PIN_LOW);
+
+					void SetMotorTwoSpeed(uint32 spdB)
+						gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
+					pwmSetDuty(hetRAM1, pwm1, 90);		 // set duty cycle to 99//
 
 					if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
 					{
@@ -1617,7 +1623,7 @@ void main(void)
 					bl_tick_move_backward_time = false;
 					max_pos_flag = false;
 				}
-				//Else not first reset
+				// Else not first reset
 				else
 				{
 					// adc_convert();//get adc value for PWM duty cycle & battery //

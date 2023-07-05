@@ -180,6 +180,7 @@ boolean flag_motor2_error = false;
 boolean flag_motor_rest = false;
 boolean max_pos_flagTwo = false;
 boolean bl_tick_move_forward_timeTwo = false;
+boolean bl_tick_move_backward_timeTwo = false;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
@@ -1727,12 +1728,11 @@ void main(void)
 				}
 				else // both backward and forward done
 				{
-
 					SetMotorTwoSpeed(0U);
 					firstResetTwo = false;		  // go to normal procedure
 					bl_tick_move_forward_timeTwo = true;
 					flag_motor2_forward = true;
-					bl_tick_move_backward_time = false;
+					bl_tick_move_backward_timeTwo = false;
 					max_pos_flagTwo = false;
 				}
 				// Else not first reset

@@ -1580,191 +1580,190 @@ void main(void)
 				updateLED_flag = false;
 				// EEPROM_readCounterData(COUNTER_EEPROM_ADD,&u32ReadBack01, &u32TestCntr);
 			}
-/***************************************************End of Motor One code***************************************************/
+			/***************************************************End of Motor One code***************************************************/
 
+			/***************************************************Start of Motor Two code***************************************************/
 
-/***************************************************Start of Motor Two code***************************************************/
-
-if (firstResetTwo)
-{
-	if (u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 1000U)
+			if (firstResetTwo)
 			{
-				gioSetBit(gioPORTA, 3, PIN_HIGH); // move forward
-				pwmSetDuty(hetRAM1, pwm1, 90);	  // set duty cycle to 99//
-			}
-			else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
-			{
-				gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
-				pwmSetDuty(hetRAM1, pwm1, 90);	 // set duty cycle to 99//
-
-				if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
+				if (u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 1000U)
 				{
-					if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-					{
-						// blfag_stop_reset = true; // motor still stuck or no power, no need reset
-						flag_motor_error = true;
-					}
-					blflag_speed_check = true;
+					gioSetBit(gioPORTA, 3, PIN_HIGH); // move forward
+					pwmSetDuty(hetRAM1, pwm1, 90);	  // set duty cycle to 99//
 				}
-			}
-			else // both backward and forward done
-			{
-
-				pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-				pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-				first_reset = false;		  // go to normal procedure
-				bl_tick_move_forward_time = true;
-				motor_forward = true;
-				bl_tick_move_backward_time = false;
-				max_pos_flag = false;
-			}
-			else
-		{
-			// adc_convert();//get adc value for PWM duty cycle & battery //
-			// blflag_speed_check = false;
-			if (flag_switch_on)
-			{
-				if (!flag_motor_error) // If no motor error
+				else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
 				{
-					if (motor_forward)
+					gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
+					pwmSetDuty(hetRAM1, pwm1, 90);	 // set duty cycle to 99//
+
+					if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
 					{
-						// Motor_move_forward_OpenLoop();
-						//  Motor_move_forward_torque();
-						if (false == max_pos_flag)
+						if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 						{
-							Motor_move_forward_pulse();
+							// blfag_stop_reset = true; // motor still stuck or no power, no need reset
+							flag_motor_error = true;
+						}
+						blflag_speed_check = true;
+					}
+				}
+				else // both backward and forward done
+				{
+
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+					first_reset = false;		  // go to normal procedure
+					bl_tick_move_forward_time = true;
+					motor_forward = true;
+					bl_tick_move_backward_time = false;
+					max_pos_flag = false;
+				}
+				//Else not first reset
+				else
+				{
+					// adc_convert();//get adc value for PWM duty cycle & battery //
+					// blflag_speed_check = false;
+					if (flag_switch_on)
+					{
+						if (!flag_motor_error) // If no motor error
+						{
+							if (motor_forward)
+							{
+								// Motor_move_forward_OpenLoop();
+								//  Motor_move_forward_torque();
+								if (false == max_pos_flag)
+								{
+									Motor_move_forward_pulse();
+								}
+								else
+								{
+									if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
+									{
+										motor_forward = false;
+										blflag_speed_check = false; // prepare for next check
+										max_pos_flag = false;
+										bl_tick_move_backward_time = true;
+										// nowtime_ms = u32GetTime_ms();
+									}
+								}
+							}
+							else
+							{
+								// Motor_move_backward_OpenLoop();
+								// Motor_move_backward_torque();
+								if (false == max_pos_flag)
+								{
+									Motor_move_backward_pulse();
+								}
+								else // max position reached, set flag for next cycle
+								{
+									if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+									{
+										motor_forward = true;
+										blflag_speed_check = false; // prepare for next check
+										max_pos_flag = false;
+										bl_tick_move_forward_time = true;
+										// nowtime_ms = u32GetTime_ms();
+										i32EncPulse_cntr = 0;
+										updateLED_flag = true;
+										if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+										{
+											EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+											vDelay_ticks(800U);
+										}
+									}
+								}
+							}
+
+							save_eeprom = true;
 						}
 						else
 						{
-							if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
-							{
-								motor_forward = false;
-								blflag_speed_check = false; // prepare for next check
-								max_pos_flag = false;
-								bl_tick_move_backward_time = true;
-								// nowtime_ms = u32GetTime_ms();
-							}
+							pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+							pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+							motor_stop = true;
 						}
 					}
 					else
 					{
-						// Motor_move_backward_OpenLoop();
-						// Motor_move_backward_torque();
-						if (false == max_pos_flag)
+						if (save_eeprom)
 						{
-							Motor_move_backward_pulse();
+							// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+							// vDelay_ticks(8000U);
+							save_eeprom = false;
+							pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+							pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
 						}
-						else // max position reached, set flag for next cycle
-						{
-							if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
-							{
-								motor_forward = true;
-								blflag_speed_check = false; // prepare for next check
-								max_pos_flag = false;
-								bl_tick_move_forward_time = true;
-								// nowtime_ms = u32GetTime_ms();
-								i32EncPulse_cntr = 0;
-								updateLED_flag = true;
-								if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
-								{
-									EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-									vDelay_ticks(800U);
-								}
-							}
-						}
-					}
 
-					save_eeprom = true;
+						motor_stop = true;
+					}
+				}
+
+				/***************************************************End of Motor Two code***************************************************/
+				vUpdateDisplay8Digit(u32TestCounter_new); // Display MotorOne counter on DisplayOne
+
+				if (!flag_motor_error)
+				{
+					vUpdateDisplay8Digit_02(u32SpeedAve); // Display MotorOne RPM on Display2; display average speed --- 31Oct change
 				}
 				else
 				{
-					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-					motor_stop = true;
+					vUpdateDisplayError_02(); // Else display Error Message on Display2
 				}
-			}
-			else
-			{
-				if (save_eeprom)
-				{
-					// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-					// vDelay_ticks(8000U);
-					save_eeprom = false;
-					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-				}
-
-				motor_stop = true;
-			}
-}
-
-/***************************************************End of Motor Two code***************************************************/
-			vUpdateDisplay8Digit(u32TestCounter_new); //Display MotorOne counter on DisplayOne
-
-			if (!flag_motor_error)
-			{
-				vUpdateDisplay8Digit_02(u32SpeedAve); // Display MotorOne RPM on Display2; display average speed --- 31Oct change
-			}
-			else
-			{
-				vUpdateDisplayError_02();	//Else display Error Message on Display2
 			}
 		}
-	}
-	
 
-	if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
-	{
-		motor_forward = true;
-		blflag_speed_check = false; // prepare for next check
-		max_pos_flag = false;
-		bl_tick_move_forward_time = true;
-		// nowtime_ms = u32GetTime_ms();
-		i32EncPulse_cntr = 0;
-		updateLED_flag = true;
-		if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+		if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
 		{
-			EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-			vDelay_ticks(800U);
+			motor_forward = true;
+			blflag_speed_check = false; // prepare for next check
+			max_pos_flag = false;
+			bl_tick_move_forward_time = true;
+			// nowtime_ms = u32GetTime_ms();
+			i32EncPulse_cntr = 0;
+			updateLED_flag = true;
+			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+			{
+				EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+				vDelay_ticks(800U);
+			}
 		}
 	}
-}
 
-/* USER CODE BEGIN (4) */
-void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
-{
-	// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
-	u32SystemTimer_1ms++;
-	u32eeprom_timer_1ms++;
-	vCheckSwitchStatus();
-}
+	/* USER CODE BEGIN (4) */
+	void rtiNotification(rtiBASE_t * rtiREG, uint32 notification)
+	{
+		// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
+		u32SystemTimer_1ms++;
+		u32eeprom_timer_1ms++;
+		vCheckSwitchStatus();
+	}
 
-/*for testing*/
+	/*for testing*/
 
-/****************Not used only for testing****************/
-/*
-pwmSetDuty(hetRAM1, pwm2, 50U);//set duty cycle and porting to pin NHET00//
-uRotary = getRotaryPosition();//Initialize rotary//
-uRotaryLastVal = uRotary;//Initialize rotary//
-*/
-/****************Not used only for testing****************/
+	/****************Not used only for testing****************/
+	/*
+	pwmSetDuty(hetRAM1, pwm2, 50U);//set duty cycle and porting to pin NHET00//
+	uRotary = getRotaryPosition();//Initialize rotary//
+	uRotaryLastVal = uRotary;//Initialize rotary//
+	*/
+	/****************Not used only for testing****************/
 
-// Var_Disp(rd_data[0]);
+	// Var_Disp(rd_data[0]);
 
-// send data through can bus//
-// can_transmit();//can_bus transmit//
-// can_receive();//can_bus receive//
-// can_rx_disp(can_datrx);//display data receive//
+	// send data through can bus//
+	// can_transmit();//can_bus transmit//
+	// can_receive();//can_bus receive//
+	// can_rx_disp(can_datrx);//display data receive//
 
-// Light_Sens_Disp();//Display Light Sensor Reading//
-// Temp_Sens_Disp();//Display Temperatur Sensor Reading//
+	// Light_Sens_Disp();//Display Light Sensor Reading//
+	// Temp_Sens_Disp();//Display Temperatur Sensor Reading//
 
-// pwmSetDuty(hetRAM1, pwm1, Duty1);
-// CheckRotary();//read encoder//
-// Encod_Disp();//Display Encoder Reading//
-/*********/
+	// pwmSetDuty(hetRAM1, pwm1, Duty1);
+	// CheckRotary();//read encoder//
+	// Encod_Disp();//Display Encoder Reading//
+	/*********/
 
-/*for testing*/
-// pos=getPWM(1,1);//get position//
-// Pin_Disp(pin_bit);//Display Pin PWM counter//
-/********/
+	/*for testing*/
+	// pos=getPWM(1,1);//get position//
+	// Pin_Disp(pin_bit);//Display Pin PWM counter//
+	/********/

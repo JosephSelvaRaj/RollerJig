@@ -1581,7 +1581,13 @@ void main(void)
 				// EEPROM_readCounterData(COUNTER_EEPROM_ADD,&u32ReadBack01, &u32TestCntr);
 			}
 /***************************************************End of Motor One code***************************************************/
-			
+
+
+/***************************************************Start of Motor Two code***************************************************/
+
+
+
+/***************************************************End of Motor Two code***************************************************/
 			vUpdateDisplay8Digit(u32TestCounter_new); //Display MotorOne counter on DisplayOne
 
 			if (!flag_motor_error)

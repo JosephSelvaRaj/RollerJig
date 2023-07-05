@@ -172,6 +172,11 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 
 volatile uint32_t u32TestCounterTwo_new;
 boolean firstResetTwo = true;
+boolean flag_motor2_forward = true;
+boolean	flag_motor2_stop = false;
+boolean flag_motor2_backward = false;
+boolean flag_motor2_pause = false;
+boolean flag_motor2_error = false;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
@@ -1038,10 +1043,9 @@ void Motor_move_forward_pulse(void)
 		i32EncPulse_cntr = 0U;
 	}
 	// move forward
-	gioSetBit(gioPORTA, 3, PIN_HIGH); // set pin 3 output as 1//
-	flag_motor_forward = true;
-	flag_motor_stop = false;
-	max_pos_flag = false;
+	gioSetBit(gioPORTA, 7, PIN_HIGH); // set pin 3 output as 1//
+	flag_motor2_forward = true;
+	flag_motor2_stop = false;
 
 	uint8_t time_index = 0;
 	uint32_t u32Temp_ms = 0;
@@ -1050,7 +1054,7 @@ void Motor_move_forward_pulse(void)
 	// now check whether timeout or not
 	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
 	{
-		flag_motor_error = true;
+		flag_motor2_error = true;
 	}
 	else
 	{
@@ -1067,7 +1071,7 @@ void Motor_move_forward_pulse(void)
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
-					flag_motor_error = true;
+					flag_motor2_error = true;
 				}
 				blflag_speed_check = true; // check no issue
 			}
@@ -1081,9 +1085,8 @@ void Motor_move_forward_pulse(void)
 			// stop motor first
 			pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
 			pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-			max_pos_flag = true;
-			flag_motor_stop = true;
-			flag_motor_forward = false;
+			flag_motor2_stop = true;
+			flag_motor2_forward = false;
 
 			// updateLED_flag = true;
 			// motor_forward = false;
@@ -1351,10 +1354,9 @@ void Motor_move_forward_pulse(void)
 		i32EncPulse_cntr = 0U;
 	}
     // move forward
-	gioSetBit(gioPORTA, 3, PIN_HIGH);//set pin 3 output as 1//
-	flag_motor_forward = true;
-	flag_motor_stop = false;
-	max_pos_flag = false;
+	SetMotorTwoDirection(PIN_HIGH);//set pin 3 output as 1//
+	flag_motor2_forward = true;
+	flag_motor2_stop = false;
 
 	uint8_t  time_index = 0;
 	uint32_t u32Temp_ms = 0;
@@ -1363,40 +1365,40 @@ void Motor_move_forward_pulse(void)
 	// now check whether timeout or not
 	if(u32TimePast_ms > PULSE_MOVE_TIMEOUT)
 	{
-		flag_motor_error = true;
+		flag_motor2_error = true;
 	}
 	else
 	{
 		// ramp up region
 		if(i32EncPulse_cntr <= RAMP_UP_PULSE_END)
 		{
-			pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_RAMP_MAX);//set duty cycle to individual //
+			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);//set duty cycle to individual //
 		}
 		else if (i32EncPulse_cntr < CONST_SPEED_PULSE_END)
 		{
-			pwmSetDuty(hetRAM1, pwm1,MOTOR_DUTYCYCLE_CONST_SPEED);
+			SetMotorTwoSpeed(hetRAM1, pwm1,MOTOR_DUTYCYCLE_CONST_SPEED);
 			// only check motor speed here
 			if((i32EncPulse_cntr > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
 			{
 				if(u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
-					flag_motor_error = true;
+					flag_motor2_error = true;
 				}
 				blflag_speed_check = true; // check no issue
 			}
 		}
 		else if (i32EncPulse_cntr < RAMP_DOWN_PULSE_END)
 		{
-			pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
+			SetMotorTwoSpeed(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
 		}
 		else
 		{
 			// stop motor first
-			pwmSetDuty(hetRAM1, pwm1, 0);//set duty cycle to 0//
-			pwmSetDuty(hetRAM1, pwm1, 0);//set duty cycle to 0//
-			max_pos_flag = true;
-			flag_motor_stop = true;
-			flag_motor_forward = false;
+			SetMotorTwoSpeed(0);//set duty cycle to 0//
+			SetMotorTwoSpeed(0);//set duty cycle to 0//
+			flag_motor2_pause = true;
+			flag_motor2_stop = true;
+			flag_motor2_forward = false;
 
 			//updateLED_flag = true;
 			//motor_forward = false;

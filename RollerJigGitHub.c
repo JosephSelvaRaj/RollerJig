@@ -1587,7 +1587,37 @@ void main(void)
 
 if (firstResetTwo)
 {
+	if (u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 1000U)
+			{
+				gioSetBit(gioPORTA, 3, PIN_HIGH); // move forward
+				pwmSetDuty(hetRAM1, pwm1, 90);	  // set duty cycle to 99//
+			}
+			else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
+			{
+				gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
+				pwmSetDuty(hetRAM1, pwm1, 90);	 // set duty cycle to 99//
 
+				if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
+				{
+					if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+					{
+						// blfag_stop_reset = true; // motor still stuck or no power, no need reset
+						flag_motor_error = true;
+					}
+					blflag_speed_check = true;
+				}
+			}
+			else // both backward and forward done
+			{
+
+				pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+				pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+				first_reset = false;		  // go to normal procedure
+				bl_tick_move_forward_time = true;
+				motor_forward = true;
+				bl_tick_move_backward_time = false;
+				max_pos_flag = false;
+			}
 }
 
 /***************************************************End of Motor Two code***************************************************/

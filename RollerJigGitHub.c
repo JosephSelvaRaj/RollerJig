@@ -171,9 +171,10 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 
 volatile uint32_t u32TestCounterTwo_new = 0;
 volatile uint32_t encoderTwoCounter = 0;
+uint32_t u32move_backwardTwo_waiting_ms = 0;
 boolean firstResetTwo = true;
 boolean flag_motorTwo_forward = true;
-boolean	flag_motorTwo_stop = false;
+boolean flag_motorTwo_stop = false;
 boolean flag_motorTwo_backward = false;
 boolean flag_motorTwo_error = false;
 boolean max_pos_flagTwo = false;
@@ -860,11 +861,11 @@ void Motor_Stop()
 
 // }
 
-//handling motor operation
-// void Motor_operation()
-// {
-//     pos= pulse_cnt;//get value of motor pulse//
-//     adc_convert();//get adc value for PWM duty cycle & battery //
+// handling motor operation
+//  void Motor_operation()
+//  {
+//      pos= pulse_cnt;//get value of motor pulse//
+//      adc_convert();//get adc value for PWM duty cycle & battery //
 
 //     //pwmSetDuty(hetRAM1, pwm0, Duty2);//set duty cycle from Temperature Sensor port to pin NHET5//
 
@@ -1345,7 +1346,7 @@ void SetMotorTwoSpeed(uint32 spdB)
 	pwmSetDuty(hetRAM1, pwm0, spdB);
 }
 
-void Motor_move_forward_pulse(void)
+void MotorTwo_move_forward_pulse(void)
 {
 	static boolean first_run = true;
 	static boolean wait_start = true;
@@ -1355,8 +1356,8 @@ void Motor_move_forward_pulse(void)
 		bl_tick_move_forward_timeTwo = false;
 		encoderTwoCounter = 0U;
 	}
-    // move forward
-	SetMotorTwoDirection(PIN_HIGH);//set pin 3 output as 1//
+	// move forward
+	SetMotorTwoDirection(PIN_HIGH); // set pin 3 output as 1//
 	flag_motorTwo_forward = true;
 	flag_motorTwo_backward = false;
 	max_pos_flagTwo = false;
@@ -1375,7 +1376,7 @@ void Motor_move_forward_pulse(void)
 		// ramp up region
 		if (encoderTwoCounter <= RAMP_UP_PULSE_END)
 		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);//set duty cycle to individual //
+			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX); // set duty cycle to individual //
 		}
 		else if (encoderTwoCounter < CONST_SPEED_PULSE_END)
 		{
@@ -1392,13 +1393,13 @@ void Motor_move_forward_pulse(void)
 		}
 		else if (encoderTwoCounter < RAMP_DOWN_PULSE_END)
 		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
+			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to individual //
 		}
 		else
 		{
 			// stop motor first
-			SetMotorTwoSpeed(0);//set duty cycle to 0//
-			SetMotorTwoSpeed(0);//set duty cycle to 0//
+			SetMotorTwoSpeed(0); // set duty cycle to 0//
+			SetMotorTwoSpeed(0); // set duty cycle to 0//
 			max_pos_flagTwo = true;
 
 			// updateLED_flag = true;
@@ -1410,7 +1411,7 @@ void Motor_move_forward_pulse(void)
 	}
 }
 
-void Motor_move_backward_pulse(void)
+void MotorTwo_move_backward_pulse(void)
 {
 	// move backward
 	SetMotorTwoDirection(BACKWARD);
@@ -1442,7 +1443,7 @@ void Motor_move_backward_pulse(void)
 		else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
-	
+
 			if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -1467,7 +1468,7 @@ void Motor_move_backward_pulse(void)
 
 			max_pos_flagTwo = true;
 
-			u32move_backward_waiting_ms = u32GetTime_ms();
+			u32move_backwardTwo_waiting_ms = u32GetTime_ms();
 		}
 	}
 }
@@ -1619,7 +1620,7 @@ void main(void)
 			{
 				if (!flag_motor_error) // If no motor error
 				{
-					if (motorTwo_forward)
+					if (motor_forward)
 					{
 						// Motor_move_forward_OpenLoop();
 						//  Motor_move_forward_torque();
@@ -1705,12 +1706,12 @@ void main(void)
 				if (u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 1000U)
 				{
 					SetMotorTwoDirection(FORWARD); // move forward
-					SetMotorTwoSpeed(90);	  // set duty cycle to 99//
+					SetMotorTwoSpeed(90U);		   // set duty cycle to 99//
 				}
 				else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
 				{
 					SetMotorTwoDirection(BACKWARD);
-					SetMotorTwoSpeed(99);
+					SetMotorTwoSpeed(99U);
 
 					if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
 					{
@@ -1727,7 +1728,7 @@ void main(void)
 
 					SetMotorTwoSpeed(0); // set duty cycle to 0//
 					SetMotorTwoSpeed(0); // set duty cycle to 0//
-					first_reset = false;		  // go to normal procedure
+					first_reset = false; // go to normal procedure
 					bl_tick_move_forward_time = true;
 					flag_motorTwo_forward = true;
 					flag_motorTwo_backward = false;
@@ -1737,8 +1738,6 @@ void main(void)
 				// Else not first reset
 				else
 				{
-					// adc_convert();//get adc value for PWM duty cycle & battery //
-					// blflag_speed_check = false;
 					if (flag_switch_on)
 					{
 						if (!flag_motorTwo_error) // If no motor error
@@ -1749,7 +1748,7 @@ void main(void)
 								//  Motor_move_forward_torque();
 								if (false == max_pos_flagTwo)
 								{
-									Motor_move_forward_pulse();
+									MotorTwo_move_forward_pulse();
 								}
 								else
 								{
@@ -1769,11 +1768,11 @@ void main(void)
 								// Motor_move_backward_torque();
 								if (false == max_pos_flagTwo)
 								{
-									Motor_move_backward_pulse();
+									MotorTwo_move_backward_pulse();
 								}
 								else // max position reached, set flag for next cycle
 								{
-									if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+									if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
 									{
 										flag_motorTwo_forward = true;
 										blflag_speed_check = false; // prepare for next check

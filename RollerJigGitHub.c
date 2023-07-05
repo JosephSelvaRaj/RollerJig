@@ -1618,6 +1618,84 @@ if (firstResetTwo)
 				bl_tick_move_backward_time = false;
 				max_pos_flag = false;
 			}
+			else
+		{
+			// adc_convert();//get adc value for PWM duty cycle & battery //
+			// blflag_speed_check = false;
+			if (flag_switch_on)
+			{
+				if (!flag_motor_error) // If no motor error
+				{
+					if (motor_forward)
+					{
+						// Motor_move_forward_OpenLoop();
+						//  Motor_move_forward_torque();
+						if (false == max_pos_flag)
+						{
+							Motor_move_forward_pulse();
+						}
+						else
+						{
+							if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
+							{
+								motor_forward = false;
+								blflag_speed_check = false; // prepare for next check
+								max_pos_flag = false;
+								bl_tick_move_backward_time = true;
+								// nowtime_ms = u32GetTime_ms();
+							}
+						}
+					}
+					else
+					{
+						// Motor_move_backward_OpenLoop();
+						// Motor_move_backward_torque();
+						if (false == max_pos_flag)
+						{
+							Motor_move_backward_pulse();
+						}
+						else // max position reached, set flag for next cycle
+						{
+							if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+							{
+								motor_forward = true;
+								blflag_speed_check = false; // prepare for next check
+								max_pos_flag = false;
+								bl_tick_move_forward_time = true;
+								// nowtime_ms = u32GetTime_ms();
+								i32EncPulse_cntr = 0;
+								updateLED_flag = true;
+								if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+								{
+									EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+									vDelay_ticks(800U);
+								}
+							}
+						}
+					}
+
+					save_eeprom = true;
+				}
+				else
+				{
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+					motor_stop = true;
+				}
+			}
+			else
+			{
+				if (save_eeprom)
+				{
+					// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+					// vDelay_ticks(8000U);
+					save_eeprom = false;
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+					pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+				}
+
+				motor_stop = true;
+			}
 }
 
 /***************************************************End of Motor Two code***************************************************/

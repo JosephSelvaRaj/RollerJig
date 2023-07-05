@@ -1746,7 +1746,7 @@ void main(void)
 				}
 
 				u32MotorEncPosition = 0;						//Havent Change
-				u32SpeedTimerTwo_ms = u32SystemTimer_1ms;			//Havent Change
+				u32SpeedTimerTwo_ms = u32SystemTimer_1ms;			
 				//EEPROM_writeCounterData(u32TestCounter, u32SpeedAve, COUNTER_EEPROM_ADD);
 
 			}

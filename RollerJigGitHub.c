@@ -177,6 +177,7 @@ boolean	flag_motor2_stop = false;
 boolean flag_motor2_backward = false;
 boolean flag_motor2_pause = false;
 boolean flag_motor2_error = false;
+boolean flag_motor_rest = false;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)

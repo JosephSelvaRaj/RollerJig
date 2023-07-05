@@ -169,7 +169,8 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define FORWARD 0U
 #define BACKWARD 1U
 
-volatile uint32_t u32TestCounterTwo_new;
+volatile uint32_t u32TestCounterTwo_new = 0;
+volatile uint32_t encoderTwoCounter = 0;
 boolean firstResetTwo = true;
 boolean flag_motor2_forward = true;
 boolean	flag_motor2_stop = false;
@@ -1352,7 +1353,7 @@ void Motor_move_forward_pulse(void)
 	{
 		nowtime_ms = u32GetTime_ms();
 		bl_tick_move_forward_time = false;
-		i32EncPulse_cntr = 0U;
+		encoderTwoCounter = 0U;
 	}
     // move forward
 	SetMotorTwoDirection(PIN_HIGH);//set pin 3 output as 1//
@@ -1371,15 +1372,15 @@ void Motor_move_forward_pulse(void)
 	else
 	{
 		// ramp up region
-		if (i32EncPulse_cntr <= RAMP_UP_PULSE_END)
+		if (encoderTwoCounter <= RAMP_UP_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);//set duty cycle to individual //
 		}
-		else if (i32EncPulse_cntr < CONST_SPEED_PULSE_END)
+		else if (encoderTwoCounter < CONST_SPEED_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
 			// only check motor speed here
-			if ((i32EncPulse_cntr > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
+			if ((encoderTwoCounter > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
@@ -1388,7 +1389,7 @@ void Motor_move_forward_pulse(void)
 				blflag_speed_check = true; // check no issue
 			}
 		}
-		else if (i32EncPulse_cntr < RAMP_DOWN_PULSE_END)
+		else if (encoderTwoCounter < RAMP_DOWN_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
 		}
@@ -1435,15 +1436,15 @@ void Motor_move_backward_pulse(void)
 	else
 	{
 		// ramp up region
-		if (i32EncPulse_cntr >= CONST_SPEED_PULSE_END)
+		if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
 		}
-		else if (i32EncPulse_cntr >= RAMP_UP_PULSE_END)
+		else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
 	
-			if ((i32EncPulse_cntr < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
+			if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
@@ -1452,7 +1453,7 @@ void Motor_move_backward_pulse(void)
 				blflag_speed_check = true; // check no issue
 			}
 		}
-		else if (i32EncPulse_cntr > 3U)
+		else if (encoderTwoCounter > 3U)
 		{
 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
 		}

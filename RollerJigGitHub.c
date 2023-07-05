@@ -647,10 +647,10 @@ uint32_t u32GetTime_ms(void)
 {
 	return u32SystemTimer_1ms;
 }
-// stop the motor//
+// stop the motor
 void Motor_Stop()
 {
-	pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
+	pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0
 }
 // void Motor_move_forward_OpenLoop(void) // Not used
 // {
@@ -800,74 +800,74 @@ void Motor_Stop()
 // 	}
 // }
 
-//// motor ramp up profile
+// motor ramp up profile
 // void Motor_Move_Torque(uint8_t direction)
-//{
+// {
 //     // direction check
-//	static bool firstcall = true;
-//	static boolean bldirection;
-//	static uint32_t u32StartTime_ms = 0;
-//	if(dir_forward == direction)
-//	{
-//		gioSetBit(gioPORTA, 3, PIN_HIGH);//move backward,set pin 3 backward=0, forward=1, for motor direction//
-//		gioSetBit(gioPORTA, 3, PIN_HIGH);//move backward,set pin 3 backward=0, forward=1, for motor direction//
-//	}
-//	else if(dir_backward == direction)
-//	{
-//		// move backward
-//		gioSetBit(gioPORTA, 3, PIN_LOW);//move backward,set pin 3 backward=0, forward=1, for motor direction//
-//		gioSetBit(gioPORTA, 3, PIN_LOW);//move backward,set pin 3 backward=0, forward=1, for motor direction//
-//	}
-//	uint16_t u16Delta_dutycycle = (uint16_t) ((MOTOR_DUTYCYCLE_RAMP_MAX - MOTOR_DUTYCYCLE_RAMP_MIN) * 0.1);
-//	uint16_t u16Stop_Delta = (uint16_t) ((MOTOR_DUTYCYCLE_STOP_MAX - MOTOR_DUTYCYCLE_STOP_MIN) * 0.1);
+// 	static bool firstcall = true;
+// 	static boolean bldirection;
+// 	static uint32_t u32StartTime_ms = 0;
+// 	if(dir_forward == direction)
+// 	{
+// 		gioSetBit(gioPORTA, 3, PIN_HIGH);//move backward,set pin 3 backward=0, forward=1, for motor direction//
+// 		gioSetBit(gioPORTA, 3, PIN_HIGH);//move backward,set pin 3 backward=0, forward=1, for motor direction//
+// 	}
+// 	else if(dir_backward == direction)
+// 	{
+// 		// move backward
+// 		gioSetBit(gioPORTA, 3, PIN_LOW);//move backward,set pin 3 backward=0, forward=1, for motor direction//
+// 		gioSetBit(gioPORTA, 3, PIN_LOW);//move backward,set pin 3 backward=0, forward=1, for motor direction//
+// 	}
+// 	uint16_t u16Delta_dutycycle = (uint16_t) ((MOTOR_DUTYCYCLE_RAMP_MAX - MOTOR_DUTYCYCLE_RAMP_MIN) * 0.1);
+// 	uint16_t u16Stop_Delta = (uint16_t) ((MOTOR_DUTYCYCLE_STOP_MAX - MOTOR_DUTYCYCLE_STOP_MIN) * 0.1);
 //     if(firstcall)
 //     {
 //     	u32StartTime_ms = u32SystemTimer_1ms;
 //     	firstcall = false;
 //     }
-//	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(u32StartTime_ms);
-//	uint32_t u32Temp_ms = 0;
-//	// ramp up region
-//	if(u32TimePast_ms <= RAMP_UP_DURATION_MS)
-//	{
-//		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MIN + (uint8_t)(u32TimePast_ms / 50U) * u16Delta_dutycycle));//set duty cycle to individual //
-//	}
-//	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
-//	{
-//		pwmSetDuty(hetRAM1, pwm1,MOTOR_DUTYCYCLE_CONST_SPEED);
-//	}
-//	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
-//	{
-//		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
-//		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - (uint8_t)(u32Temp_ms / 50U) * u16Delta_dutycycle));//set duty cycle to individual //
-//	}
-//	else if(u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
-//	{
-//		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
-//		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - (uint8_t)(u32Temp_ms / 50U) * u16Stop_Delta));//set duty cycle to 0//
-//	}
-//	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
-//	{
-//		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to 0//
-//	}
-//	else
-//	{
-//		//waiting period finish, should start next cycle
-//		//flag_motor_backword = true;
-//		timeout_flag = !timeout_flag;
-//		max_pos_flag = true;
-//	}
-//
+// 	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(u32StartTime_ms);
+// 	uint32_t u32Temp_ms = 0;
+// 	// ramp up region
+// 	if(u32TimePast_ms <= RAMP_UP_DURATION_MS)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MIN + (uint8_t)(u32TimePast_ms / 50U) * u16Delta_dutycycle));//set duty cycle to individual //
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS) + 1)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1,MOTOR_DUTYCYCLE_CONST_SPEED);
+// 	}
+// 	else if (u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS;
+// 		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_RAMP_MAX - (uint8_t)(u32Temp_ms / 50U) * u16Delta_dutycycle));//set duty cycle to individual //
+// 	}
+// 	else if(u32TimePast_ms < (CONST_SPEED_DURATION_MS + RAMP_UP_DURATION_MS + RAMP_DOWN_DURATION_MS + MOTOR_STOP_DURATION_MS + 1U))
+// 	{
+// 		u32Temp_ms = u32TimePast_ms - CONST_SPEED_DURATION_MS - RAMP_UP_DURATION_MS - RAMP_DOWN_DURATION_MS;
+// 		pwmSetDuty(hetRAM1, pwm1, (MOTOR_DUTYCYCLE_STOP_MAX - (uint8_t)(u32Temp_ms / 50U) * u16Stop_Delta));//set duty cycle to 0//
+// 	}
+// 	else if (u32TimePast_ms < WHOLE_WAITING_TIME_MS)
+// 	{
+// 		pwmSetDuty(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to 0//
+// 	}
+// 	else
+// 	{
+// 		//waiting period finish, should start next cycle
+// 		//flag_motor_backword = true;
+// 		timeout_flag = !timeout_flag;
+// 		max_pos_flag = true;
+// 	}
+
 // }
 
-// handling motor operation//
+//handling motor operation
 // void Motor_operation()
-//{
+// {
 //     pos= pulse_cnt;//get value of motor pulse//
 //     adc_convert();//get adc value for PWM duty cycle & battery //
-//
+
 //     //pwmSetDuty(hetRAM1, pwm0, Duty2);//set duty cycle from Temperature Sensor port to pin NHET5//
-//
+
 //     if((motor_bw==true)&&(pos>MIN_PULSE)&&(motor_stop==false))//motor run backward//
 //     {
 //         Motor_backward();//motor move backward//
@@ -881,7 +881,7 @@ void Motor_Stop()
 //            )
 //     {
 //         Motor_Stop();//stop motor because error//
-//
+
 //         motor_dir= 2;
 //     }
 //     else if( (motor_stop==true)&&(motor_bw==false)
@@ -890,7 +890,7 @@ void Motor_Stop()
 //     {
 //         Motor_Stop();//stop motor because error//
 //         delay(10000);
-//
+
 //         if((motor_stop==true)&&(motor_bw==false))
 //         {
 //           cycle_cnt +=1;//start counting cycle//
@@ -900,18 +900,18 @@ void Motor_Stop()
 //         {
 //           Pin_Disp(mdir);//Display Motor Direction //
 //         }
-//
+
 //         motor_stop=false;
 //     }
-//
+
 //     //can_dattx=pos;//assign for can bus communication//
-//
+
 //     //Handling save data to eeprom//
 //     if(Batt<=BATT_LIM)//battery reading range adc from 0~3.3Volt
 //     {
 //       EEPROM_writeData(pos, cycle_cnt ,0x01);//write data to EEPROM//
 //     }
-//
+
 //     //Display position & cycle in close, middle & open position//
 //     if((pos>=(MIN_PULSE-10)) && (pos<=MIN_PULSE))
 //     {
@@ -929,7 +929,7 @@ void Motor_Stop()
 //       Var_Disp(cycle_cnt);//Display motor running cycle//
 //     }
 // }
-/////***************End of Motor Application**********************//////
+///***************End of Motor Application**********************//////
 
 //******** SWITCH APPLICATION***********//
 void vCheckSwitchStatus(void)

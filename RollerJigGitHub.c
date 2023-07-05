@@ -1596,11 +1596,9 @@ void main(void)
 				}
 				else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
 				{
-					SetMotorTwoDirection(PIN_LOW);
-
-					void SetMotorTwoSpeed(uint32 spdB)
-						gioSetBit(gioPORTA, 3, PIN_LOW); // move backward
-					pwmSetDuty(hetRAM1, pwm1, 90);		 // set duty cycle to 99//
+					SetMotorTwoDirection(BACKWARD);
+					SetMotorTwoSpeed(99);
+		
 
 					if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
 					{

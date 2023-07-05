@@ -168,6 +168,7 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define MOTORTWOPWMPIN 19U
 
 volatile uint32_t u32TestCounterTwo_new;
+boolean firstResetTwo = true;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
@@ -1579,20 +1580,21 @@ void main(void)
 				updateLED_flag = false;
 				// EEPROM_readCounterData(COUNTER_EEPROM_ADD,&u32ReadBack01, &u32TestCntr);
 			}
-
-			vUpdateDisplay8Digit(u32TestCounter_new);
+/***************************************************End of Motor One code***************************************************/
+			
+			vUpdateDisplay8Digit(u32TestCounter_new); //Display MotorOne counter on DisplayOne
 
 			if (!flag_motor_error)
 			{
-				vUpdateDisplay8Digit_02(u32SpeedAve); // display average speed --- 31Oct change
+				vUpdateDisplay8Digit_02(u32SpeedAve); // Display MotorOne RPM on Display2; display average speed --- 31Oct change
 			}
 			else
 			{
-				vUpdateDisplayError_02();
+				vUpdateDisplayError_02();	//Else display Error Message on Display2
 			}
 		}
 	}
-	/***************************************************End of Motor One code***************************************************/
+	
 
 	if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
 	{

@@ -1376,7 +1376,7 @@ void Motor_move_forward_pulse(void)
 		}
 		else if (i32EncPulse_cntr < CONST_SPEED_PULSE_END)
 		{
-			SetMotorTwoSpeed(hetRAM1, pwm1,MOTOR_DUTYCYCLE_CONST_SPEED);
+			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
 			// only check motor speed here
 			if ((i32EncPulse_cntr > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
 			{

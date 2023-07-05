@@ -177,6 +177,7 @@ boolean flag_motor2_backward = false;
 boolean flag_motor2_pause = false;
 boolean flag_motor2_error = false;
 boolean flag_motor_rest = false;
+boolean max_pos_flagTwo = false;
 
 //**********************************MOTOR TWO VARIABLES END **********************************//
 void Motor_status_Disp(uint32_t var01, uint32_t var02)
@@ -1389,7 +1390,7 @@ void Motor_move_forward_pulse(void)
 		}
 		else if (i32EncPulse_cntr < RAMP_DOWN_PULSE_END)
 		{
-			SetMotorTwoSpeed(hetRAM1, pwm1, MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
+			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);//set duty cycle to individual //
 		}
 		else
 		{
@@ -1413,10 +1414,10 @@ void Motor_move_backward_pulse(void)
 {
 	// move backward
 	SetMotorTwoDirection(BACKWARD);
-	flag_motor_forward = false;
-	flag_motor_stop = false;
+	flag_motor2_forward = false;
+	flag_motor2_stop = false;
 	uint32_t u32Temp_ms = 0;
-	max_pos_flag = false;
+	max_pos_flagTwo = false;
 	static uint32_t u32TimePast_ms;
 
 	if (bl_tick_move_backward_time)
@@ -1429,7 +1430,7 @@ void Motor_move_backward_pulse(void)
 	// now check whether timeout or not
 	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
 	{
-		flag_motor_error = true;
+		flag_motor2_error = true;
 	}
 	else
 	{
@@ -1446,7 +1447,7 @@ void Motor_move_backward_pulse(void)
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
-					flag_motor_error = true;
+					flag_motor2_error = true;
 				}
 				blflag_speed_check = true; // check no issue
 			}
@@ -1458,14 +1459,14 @@ void Motor_move_backward_pulse(void)
 		else
 		{
 			SetMotorTwoSpeed(0U);
-			if (!flag_motor_error)
+			if (!flag_motor2_error)
 			{
 				u32TestCounter_new++;
 			}
 			blflag_speed_check = false; // prepare for next speed check
 
-			flag_motor_stop = true;
-			max_pos_flag = true;
+			flag_motor2_stop = true;
+			max_pos_flagTwo = true;
 
 			u32move_backward_waiting_ms = u32GetTime_ms();
 		}

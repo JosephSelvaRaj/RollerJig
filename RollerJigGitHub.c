@@ -169,6 +169,17 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define FORWARD 1U
 #define BACKWARD 0U
 
+volatile uint32_t u32ResetTimerTwo_ms = 0;
+volatile uint32_t u32SystemTimerTwo_1ms = 0;
+volatile uint32_t u32SpeedTimerTwo_ms = 0;
+
+volatile uint32_t u32Speed_rpmTwo = 0;
+volatile uint32_t u32SpeedSumTwo = 0;
+volatile uint32_t u32SpeedAveTwo = 0;
+volatile uint32_t u32TimerTwo_100ms = 0;
+volatile uint8_t u8IndexTwo = 0; 
+volatile uint32_t u32ErrorHappenTwo_cntr = 0;
+
 volatile uint32_t u32TestCounterTwo_new = 0;
 volatile uint32_t encoderTwoCounter = 0;
 boolean firstResetTwo = true;
@@ -1500,6 +1511,7 @@ void main(void)
 	// firstzero = true;
 
 	u32SpeedTimer_ms = u32SystemTimer_1ms;
+	u32SpeedTimerTwo_ms = u32SystemTimer_1ms;
 	u32MotorEncPosition = 0;
 	uint8_t u8Index = 0;
 	u32SpeedAve = 0;
@@ -1700,19 +1712,58 @@ void main(void)
 
 			/***************************************************Start of Motor Two code***************************************************/
 
+			// motor speed measure
+			if(u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
+			{
+				u32TimerTwo_100ms++;
+				u32Speed_rpmTwo = (uint32_t)(100 * u32MotorEncPosition);  //Havent change
+				u32SpeedSumTwo = u32SpeedSumTwo + u32Speed_rpmTwo;
+				u8IndexTwo++;
+				if(u8IndexTwo > 3)
+				{
+					u32SpeedAveTwo = (uint32_t)(u32SpeedSumTwo >> 2U);
+					u8IndexTwo = 0;
+					u32SpeedSumTwo = 0;
+				}
+
+
+
+				if((flag_motorTwo_error) && (!blfag_stop_reset))	//Havent Change
+				{
+					if(u32ErrorHappenTwo_cntr++ > 6000) // wait for 10mins, every retry fail increase 1 min
+					{
+						//restart
+						u32ErrorHappenTwo_cntr = 0;
+
+						blflag_reset = true;					//Havent Change
+						flag_motorTwo_error = false;
+						firstResetTwo = true;
+						blflag_speed_check = false;				//Havent Change
+						u32ResetTimerTwo_ms = u32SystemTimer_1ms;   //Havent Change
+						encoderTwoCounter = 0;
+						u32eeprom_timer_1ms = 0U;				//Havent Change
+					}
+				}
+
+				u32MotorEncPosition = 0;						//Havent Change
+				u32SpeedTimerTwo_ms = u32SystemTimer_1ms;			//Havent Change
+				//EEPROM_writeCounterData(u32TestCounter, u32SpeedAve, COUNTER_EEPROM_ADD);
+
+			}
+			
 			if (firstResetTwo)
 			{
-				if (u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 1000U)
+				if (u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) < 1000U)
 				{
 					SetMotorTwoDirection(FORWARD); // move forward
 					SetMotorTwoSpeed(90);	  // set duty cycle to 99//
 				}
-				else if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) < 2001U)) // let motor run at least 1s at 100% pwm
+				else if ((u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) < 2001U)) // let motor run at least 1s at 100% pwm
 				{
 					SetMotorTwoDirection(BACKWARD);
 					SetMotorTwoSpeed(99);
 
-					if ((u32GetTimeSliceDuration_ms(u32ResetTimer_ms) > 1200U) && !blflag_speed_check)
+					if ((u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) > 1200U) && !blflag_speed_check)
 					{
 						if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 						{

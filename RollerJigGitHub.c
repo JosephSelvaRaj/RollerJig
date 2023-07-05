@@ -1585,7 +1585,10 @@ void main(void)
 
 /***************************************************Start of Motor Two code***************************************************/
 
+if (firstResetTwo)
+{
 
+}
 
 /***************************************************End of Motor Two code***************************************************/
 			vUpdateDisplay8Digit(u32TestCounter_new); //Display MotorOne counter on DisplayOne

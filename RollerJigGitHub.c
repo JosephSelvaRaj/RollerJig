@@ -179,6 +179,7 @@ volatile uint32_t u32SpeedAveTwo = 0;
 volatile uint32_t u32TimerTwo_100ms = 0;
 volatile uint8_t u8IndexTwo = 0; 
 volatile uint32_t u32ErrorHappenTwo_cntr = 0;
+volatile int motorTwoTimer = 0;
 
 volatile uint32_t u32TestCounterTwo_new = 0;
 volatile uint32_t encoderTwoCounter = 0;
@@ -1896,6 +1897,7 @@ void main(void)
 		// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
 		u32SystemTimer_1ms++;
 		u32eeprom_timer_1ms++;
+		motorTwoTimer++;
 		vCheckSwitchStatus();
 	}
 

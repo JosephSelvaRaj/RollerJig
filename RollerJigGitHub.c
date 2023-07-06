@@ -163,11 +163,11 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define COUNTERTWO_EEPROM_ADD 0x02
 
 // Motor Two Pins
+#define BACKWARD 0U
+#define FORWARD 1U
 #define MOTORTWOENCODERPIN 5U
 #define MOTORTWODIRPIN 7U
 #define MOTORTWOPWMPIN 19U
-#define FORWARD 1U
-#define BACKWARD 0U
 
 volatile uint32_t u32ResetTimerTwo_ms = 0;
 volatile uint32_t u32SystemTimerTwo_1ms = 0;
@@ -177,7 +177,7 @@ volatile uint32_t u32Speed_rpmTwo = 0;
 volatile uint32_t u32SpeedSumTwo = 0;
 volatile uint32_t u32SpeedAveTwo = 0;
 volatile uint32_t u32TimerTwo_100ms = 0;
-volatile uint8_t u8IndexTwo = 0; 
+volatile uint8_t u8IndexTwo = 0;
 volatile uint32_t u32ErrorHappenTwo_cntr = 0;
 volatile int motorTwoTimer = 0;
 
@@ -1430,7 +1430,6 @@ void MotorTwo_move_backward_pulse(void)
 	flag_motorTwo_backward = true;
 	flag_motorTwo_forward = false;
 	uint32_t u32Temp_ms = 0;
-	max_pos_flagTwo = false;
 	static uint32_t u32TimePast_ms;
 
 	if (bl_tick_move_backward_time)
@@ -1447,41 +1446,43 @@ void MotorTwo_move_backward_pulse(void)
 	}
 	else
 	{
-		// ramp up region
-		if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
-		}
-		else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
+		SetMotorTwoSpeed(70U);
 
-			if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
-			{
-				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-				{
-					flag_motorTwo_error = true;
-				}
-				blflag_speed_check = true; // check no issue
-			}
-		}
-		else if (encoderTwoCounter > 3U)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
-		}
-		else
-		{
-			SetMotorTwoSpeed(0U);
-			if (!flag_motorTwo_error)
-			{
-				u32TestCounter_new++;
-			}
-			blflag_speed_check = false; // prepare for next speed check
+		// // ramp up region
+		// if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
+		// {
+		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
+		// }
+		// else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
+		// {
+		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
 
-			max_pos_flagTwo = true;
+		// 	if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
+		// 	{
+		// 		if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+		// 		{
+		// 			flag_motorTwo_error = true;
+		// 		}
+		// 		blflag_speed_check = true; // check no issue
+		// 	}
+		// }
+		// else if (encoderTwoCounter > 3U)
+		// {
+		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
+		// }
+		// else
+		// {
+		// 	SetMotorTwoSpeed(0U);
+		// 	if (!flag_motorTwo_error)
+		// 	{
+		// 		u32TestCounter_new++;
+		// 	}
+		// 	blflag_speed_check = false; // prepare for next speed check
 
-			u32move_backwardTwo_waiting_ms = u32GetTime_ms();
-		}
+		// 	max_pos_flagTwo = true;
+
+		// 	u32move_backwardTwo_waiting_ms = u32GetTime_ms();
+		// }
 	}
 }
 
@@ -1715,44 +1716,41 @@ void main(void)
 			/***************************************************Start of Motor Two code***************************************************/
 
 			// motor speed measure
-			if(u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
+			if (u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
 			{
 				u32TimerTwo_100ms++;
-				u32Speed_rpmTwo = (uint32_t)(100 * u32MotorEncPosition);  //Havent change
+				u32Speed_rpmTwo = (uint32_t)(100 * u32MotorEncPosition); // Havent change
 				u32SpeedSumTwo = u32SpeedSumTwo + u32Speed_rpmTwo;
 				u8IndexTwo++;
-				if(u8IndexTwo > 3)
+				if (u8IndexTwo > 3)
 				{
 					u32SpeedAveTwo = (uint32_t)(u32SpeedSumTwo >> 2U);
 					u8IndexTwo = 0;
 					u32SpeedSumTwo = 0;
 				}
 
-
-
-				if((flag_motorTwo_error) && (!blfag_stop_reset))	//Havent Change
+				if ((flag_motorTwo_error) && (!blfag_stop_reset)) // Havent Change
 				{
-					if(u32ErrorHappenTwo_cntr++ > 6000) // wait for 10mins, every retry fail increase 1 min
+					if (u32ErrorHappenTwo_cntr++ > 6000) // wait for 10mins, every retry fail increase 1 min
 					{
-						//restart
+						// restart
 						u32ErrorHappenTwo_cntr = 0;
 
-						blflag_reset = true;					//Havent Change
+						blflag_reset = true; // Havent Change
 						flag_motorTwo_error = false;
 						firstResetTwo = true;
-						blflag_speed_check = false;				//Havent Change
-						u32ResetTimerTwo_ms = u32SystemTimer_1ms;   //Havent Change
+						blflag_speed_check = false;				  // Havent Change
+						u32ResetTimerTwo_ms = u32SystemTimer_1ms; // Havent Change
 						encoderTwoCounter = 0;
-						u32eeprom_timer_1ms = 0U;				//Havent Change
+						u32eeprom_timer_1ms = 0U; // Havent Change
 					}
 				}
 
-				u32MotorEncPosition = 0;						//Havent Change
-				u32SpeedTimerTwo_ms = u32SystemTimer_1ms;			
-				//EEPROM_writeCounterData(u32TestCounter, u32SpeedAve, COUNTER_EEPROM_ADD);
-
+				u32MotorEncPosition = 0; // Havent Change
+				u32SpeedTimerTwo_ms = u32SystemTimer_1ms;
+				// EEPROM_writeCounterData(u32TestCounter, u32SpeedAve, COUNTER_EEPROM_ADD);
 			}
-			
+
 			if (firstResetTwo)
 			{
 				if (u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) < 1000U)
@@ -1790,74 +1788,123 @@ void main(void)
 				// Else not first reset
 				else
 				{
+					// Motor Switch is on -> Motor continue running
 					if (flag_switch_on)
 					{
-						if (!flag_motorTwo_error) // If no motor error
+						// No motor error -> Motor continue running
+						if (!flag_motorTwo_error)
 						{
-							if (flag_motorTwo_forward)
+							if (motorTwoTimer <= 3000) // 3secs
 							{
-								// Motor_move_forward_OpenLoop();
-								//  Motor_move_forward_torque();
-								if (false == max_pos_flagTwo)
-								{
-									MotorTwo_move_forward_pulse();
-								}
-								else
-								{
-									if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
-									{
-										flag_motorTwo_forward = false;
-										blflag_speed_check = false; // prepare for next check
-										max_pos_flagTwo = false;
-										bl_tick_move_backward_time = true;
-										// nowtime_ms = u32GetTime_ms();
-									}
-								}
+								// MotorTwo run forward for 3 secs
+								SetMotorTwoDirection(FORWARD);
+								SetMotorTwoSpeed(70U);
 							}
+
+							else if (3000 < motorTwoTimer <= 4000) // 1 sec
+							{
+								// MotorTwo pause for 1 sec
+								SetMotorTwoSpeed(0U);
+							}
+
+							else if (4000 < motorTwoTimer <= 7500) // 3.5 secs
+							{
+								// MotorTwo run backward for 3.5 secs
+								SetMotorTwoDirection(BACKWARD);
+								SetMotorTwoSpeed(70U);
+							}
+
+							else if (7500 < motorTwoTimer <= 12500) // 5 secs
+							{
+								// MotorTwo pause for 5 secs
+								SetMotorTwoSpeed(0U);
+							}
+
 							else
 							{
-								if (false == max_pos_flagTwo)
-								{
-									MotorTwo_move_backward_pulse();
-								}
-								else // max position reached, set flag for next cycle
-								{
-									if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
-									{
-										flag_motorTwo_forward = true;
-										blflag_speed_check = false; // prepare for next check
-										max_pos_flagTwo = false;
-										bl_tick_move_forward_time = true;
-										// nowtime_ms = u32GetTime_ms();
-										encoderTwoCounter = 0;
-										updateLED_flag = true;
-										if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
-										{
-											EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-											vDelay_ticks(800U);
-										}
-									}
-								}
+								// End of one cycle
+								// u32TestCounter_new++ here?
+								motorTwoTimer = 0;
 							}
+
+							// Save counter to EEPROM every 12 cycles
+							if ((u32TestCounter_new % 12U) == 0)
+							{
+								// Stop motor prior to EEPOM saving to prevent encoder interrupts from corrupting EEPROM writing
+								// Might need to stop MotorOne too
+								SetMotorTwoSpeed(0U);
+								saveCountersToEEPROM();
+								vDelay_ticks(800U);
+							}
+
+							// if (flag_motorTwo_forward)
+							// {
+
+							// 	if (false == max_pos_flagTwo)
+							// 	{
+							// 		MotorTwo_move_forward_pulse();
+							// 	}
+							// 	else
+							// 	{
+							// 		if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
+							// 		{
+							// 			flag_motorTwo_forward = false;
+							// 			blflag_speed_check = false; // prepare for next check
+							// 			max_pos_flagTwo = false;
+							// 			bl_tick_move_backward_time = true;
+							// 			// nowtime_ms = u32GetTime_ms();
+							// 		}
+							// 	}
+							// }
+							// else
+							// {
+							// 	if (false == max_pos_flagTwo)
+							// 	{
+							// 		MotorTwo_move_backward_pulse();
+							// 	}
+							// 	else // max position reached, set flag for next cycle
+							// 	{
+							// 		if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+							// 		{
+							// 			flag_motorTwo_forward = true;
+							// 			blflag_speed_check = false; // prepare for next check
+							// 			max_pos_flagTwo = false;
+							// 			bl_tick_move_forward_time = true;
+							// 			// nowtime_ms = u32GetTime_ms();
+							// 			encoderTwoCounter = 0;
+							// 			updateLED_flag = true;
+							// 			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+							// 			{
+							// 				EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+							// 				vDelay_ticks(800U);
+							// 			}
+							// 		}
+							// 	}
+							// }
 
 							save_eeprom = true;
 						}
+
+						// MotorTwo error -> Stop MotorTwo
 						else
 						{
-							SetMotorTwoSpeed(0); // set duty cycle to 0//
-							SetMotorTwoSpeed(0); // set duty cycle to 0//
+							SetMotorTwoSpeed(0U); // set duty cycle to 0//
 						}
 					}
+
+					// Motor Switch is off -> Motors stop running
 					else
 					{
-						if (save_eeprom)
-						{
-							// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-							// vDelay_ticks(8000U);
-							save_eeprom = false;
-							SetMotorTwoSpeed(0); // set duty cycle to 0//
-							SetMotorTwoSpeed(0); // set duty cycle to 0//
-						}
+						// Motors stop here?
+
+						// if (save_eeprom)
+						// {
+						// 	// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+						// 	// vDelay_ticks(8000U);
+						// 	save_eeprom = false;
+						// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
+						// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
+						// }
 					}
 				}
 

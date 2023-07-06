@@ -1815,8 +1815,6 @@ void main(void)
 							}
 							else
 							{
-								// Motor_move_backward_OpenLoop();
-								// Motor_move_backward_torque();
 								if (false == max_pos_flagTwo)
 								{
 									MotorTwo_move_backward_pulse();
@@ -1882,7 +1880,6 @@ void main(void)
 			blflag_speed_check = false; // prepare for next check
 			max_pos_flag = false;
 			bl_tick_move_forward_time = true;
-			// nowtime_ms = u32GetTime_ms();
 			i32EncPulse_cntr = 0;
 			updateLED_flag = true;
 			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once

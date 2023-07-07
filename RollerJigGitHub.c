@@ -1889,6 +1889,7 @@ void main(void)
 					{
 						// Motors stop here?
 						//
+						//
 						pwmSetDuty(hetRAM1, pwm1, 0U); // MotorOne stop
 						SetMotorTwoSpeed(0U);		   // Stop MotorTwo
 

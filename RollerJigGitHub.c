@@ -1787,6 +1787,7 @@ void main(void)
 					bl_tick_move_backward_time = false;
 					max_pos_flagTwo = false;
 				}
+			}
 				// Else not first reset
 				else
 				{

@@ -1546,14 +1546,14 @@ void main(void)
 	while (1) // Loop to acquire and do the task//
 	{
 		// start EEPROM writing
-		if (u32eeprom_timer_1ms > 180000) // every 3mins save the eeprom data // --- change from 30mins to 3min, 03May2023
-		{
+		// if (u32eeprom_timer_1ms > 180000) // every 3mins save the eeprom data // --- change from 30mins to 3min, 03May2023
+		// {
 
-			// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-			// vDelay_ticks(800U);
-			u32eeprom_timer_1ms = 0; // reset the timer
-			u32eeprom_timer_1ms = 0;
-		}
+		// 	// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+		// 	// vDelay_ticks(800U);
+		// 	u32eeprom_timer_1ms = 0; // reset the timer
+		// 	u32eeprom_timer_1ms = 0;
+		// }
 
 		// motor speed measure
 		if (u32GetTimeSliceDuration_ms(u32SpeedTimer_ms) > 100U) // every 100ms calculate the speed
@@ -1626,6 +1626,7 @@ void main(void)
 			}
 		}
 		/***************************************************Start of Motor One code***************************************************/
+		//Not first reset
 		else
 		{
 			// adc_convert();//get adc value for PWM duty cycle & battery //
@@ -1691,6 +1692,7 @@ void main(void)
 					motor_stop = true;
 				}
 			}
+			//Motor switch off
 			else
 			{
 				if (save_eeprom)
@@ -1823,18 +1825,8 @@ void main(void)
 							else
 							{
 								// End of one cycle
-								// u32TestCounter_new++ here?
+								u32TestCounterTwo_new++;
 								motorTwoTimer = 0;
-							}
-
-							// Save counter to EEPROM every 12 cycles
-							if ((u32TestCounter_new % 12U) == 0)
-							{
-								// Stop motor prior to EEPOM saving to prevent encoder interrupts from corrupting EEPROM writing
-								// Might need to stop MotorOne too
-								SetMotorTwoSpeed(0U);
-								saveCountersToEEPROM();
-								vDelay_ticks(800U);
 							}
 
 							// if (flag_motorTwo_forward)
@@ -1888,7 +1880,7 @@ void main(void)
 						// MotorTwo error -> Stop MotorTwo
 						else
 						{
-							SetMotorTwoSpeed(0U); // set duty cycle to 0//
+							SetMotorTwoSpeed(0U); // Stop MotorTwo
 						}
 					}
 
@@ -1896,6 +1888,8 @@ void main(void)
 					else
 					{
 						// Motors stop here?
+						pwmSetDuty(hetRAM1, pwm1, 0U); // MotorOne stop
+						SetMotorTwoSpeed(0U);		   // Stop MotorTwo
 
 						// if (save_eeprom)
 						// {

@@ -183,7 +183,6 @@ volatile uint32_t u32ErrorHappenTwo_cntr = 0;
 volatile int motorTwoTimer = 0;
 
 volatile uint32_t u32TestCounterTwo_new = 0;
-volatile uint32_t encoderTwoCounter = 0;
 uint32_t u32move_backwardTwo_waiting_ms = 0;
 boolean firstResetTwo = true;
 boolean flag_motorTwo_forward = true;
@@ -1925,8 +1924,8 @@ void main(void)
 		}
 
 		/***************************************************End of Motor Two code***************************************************/
-		
-		if (!flag_motor_error)	//If no MotorOne error
+
+		if (!flag_motor_error) // If no MotorOne error
 		{
 			vUpdateDisplay8Digit(u32TestCounter_new); // Display MotorOne counter on DisplayOne
 		}
@@ -1935,7 +1934,7 @@ void main(void)
 			vUpdateDisplayError_01(); // Else display Error Message on DisplayOne
 		}
 
-		if (!flag_motorTwo_error)	//If no MotorTwo error
+		if (!flag_motorTwo_error) // If no MotorTwo error
 		{
 			vUpdateDisplay8Digit_02(u32TestCounterTwo_new); // Display MotorTwo counter on DisplayTwo
 		}

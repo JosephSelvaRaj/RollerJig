@@ -1958,16 +1958,17 @@ void main(void)
 			}
 		}
 	}
+}
 
-	/* USER CODE BEGIN (4) */
-	void rtiNotification(rtiBASE_t * rtiREG, uint32 notification)
-	{
-		// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
-		u32SystemTimer_1ms++;
-		u32eeprom_timer_1ms++;
-		motorTwoTimer++;
-		vCheckSwitchStatus();
-	}
+/* USER CODE BEGIN (4) */
+void rtiNotification(rtiBASE_t * rtiREG, uint32 notification)
+{
+	// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
+	u32SystemTimer_1ms++;
+	u32eeprom_timer_1ms++;
+	motorTwoTimer++;
+	vCheckSwitchStatus();
+}
 
 	/*for testing*/
 

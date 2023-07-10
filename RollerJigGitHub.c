@@ -1788,7 +1788,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         // blfag_stop_reset = true; // motor still stuck or no power, no need reset
-                        flag_motorTwo_error = true;
+                        //flag_motorTwo_error = true;
                     }
                     blflag_speed_check = true;
                 }
@@ -1798,7 +1798,7 @@ void main(void)
 
                 SetMotorTwoSpeed(0); // set duty cycle to 0//
                 SetMotorTwoSpeed(0); // set duty cycle to 0//
-                first_reset = false; // go to normal procedure
+                firstResetTwo = false; // go to normal procedure
                 bl_tick_move_forward_time = true;
                 flag_motorTwo_forward = true;
                 flag_motorTwo_backward = false;

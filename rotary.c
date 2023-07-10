@@ -201,43 +201,52 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
     volatile uint32_t offset = bit;
 
-    if(offset>=1U)//check when rising event triggered//
+    if(bit == 1)
     {
-        pin_bit= !pin_bit;//assign to pin bit//
-        u32MotorEncPosition++;
+        if(offset>=1U)//check when rising event triggered//
+        {
+            pin_bit= !pin_bit;//assign to pin bit//
+            u32MotorEncPosition++;
+        }
+
+        // count the pulse
+        if(!flag_motor_stop && flag_motor_forward) // forward
+        {
+            u32motor_rotate_pulse_cntr++;
+            i32EncPulse_cntr++;
+        }
+        else if(!flag_motor_stop && !flag_motor_forward) // backward
+        {
+            if(u32motor_rotate_pulse_cntr > 0) u32motor_rotate_pulse_cntr--;
+            if(i32EncPulse_cntr > 0) i32EncPulse_cntr--;
+        }
+        if(flag_motor_stop)
+        {
+            //i32EncPulse_cntr = 0;
+        }
+        mdir= motor_dir;//assign motor direction value//
+        pulse_cnt = getPWM(mdir, pin_bit);//count PWM value based on motor direction//
+
+        if((motor_bw==true)&&(pulse_cnt<=MIN_PULSE))//check direction based on position//
+        {
+        motor_stop=true;
+        motor_bw=false;//motor run forward//
+        pulse_cnt=MIN_PULSE;
+
+        }
+        else if((motor_bw==false)&&(pulse_cnt>=MAX_PULSE))//check direction based on position//
+        {
+        motor_stop=true;
+        motor_bw=true;//motor run backward//
+        pulse_cnt=MAX_PULSE;
+
+        }
     }
-
-    // count the pulse
-    if(!flag_motor_stop && flag_motor_forward) // forward
-	{
-    	u32motor_rotate_pulse_cntr++;
-    	i32EncPulse_cntr++;
-	}
-    else if(!flag_motor_stop && !flag_motor_forward) // backward
-	{
-    	if(u32motor_rotate_pulse_cntr > 0) u32motor_rotate_pulse_cntr--;
-    	if(i32EncPulse_cntr > 0) i32EncPulse_cntr--;
-	}
-    if(flag_motor_stop)
-    {
-    	//i32EncPulse_cntr = 0;
+    else
+    {   if(offset>=1U)//check when rising event triggered//
+        {
+            pin_bit= !pin_bit;//assign to pin bit//
+            encoderTwoCounter++;
+        }
     }
-    mdir= motor_dir;//assign motor direction value//
-    pulse_cnt = getPWM(mdir, pin_bit);//count PWM value based on motor direction//
-
-    if((motor_bw==true)&&(pulse_cnt<=MIN_PULSE))//check direction based on position//
-    {
-       motor_stop=true;
-       motor_bw=false;//motor run forward//
-       pulse_cnt=MIN_PULSE;
-
-    }
-    else if((motor_bw==false)&&(pulse_cnt>=MAX_PULSE))//check direction based on position//
-    {
-       motor_stop=true;
-       motor_bw=true;//motor run backward//
-       pulse_cnt=MAX_PULSE;
-
-    }
-
 }

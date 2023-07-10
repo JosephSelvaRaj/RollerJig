@@ -1781,7 +1781,7 @@ void main(void)
             else if ((u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) < 2001U)) // let motor run at least 1s at 100% pwm
             {
                 SetMotorTwoDirection(BACKWARD);
-                SetMotorTwoSpeed(99U);
+                SetMotorTwoSpeed(90U);
 
                 if ((u32GetTimeSliceDuration_ms(u32ResetTimerTwo_ms) > 1200U) && !blflag_speed_check)
                 {

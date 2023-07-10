@@ -1810,117 +1810,117 @@ void main(void)
 		else
 		{
 			// Motor Switch is on -> Motor continue running
-			if (flag_switch_on)
+			// if (flag_switch_on)
+			// {
+			// No motor error -> Motor continue running
+			if (!flag_motorTwo_error)
 			{
-				// No motor error -> Motor continue running
-				if (!flag_motorTwo_error)
+				if (motorTwoTimer <= 3000) // 3secs
 				{
-					if (motorTwoTimer <= 3000) // 3secs
-					{
-						// MotorTwo run forward for 3 secs
-						SetMotorTwoDirection(FORWARD);
-						SetMotorTwoSpeed(70U);
-					}
-
-					else if (3000 < motorTwoTimer <= 4000) // 1 sec
-					{
-						// MotorTwo pause for 1 sec
-						SetMotorTwoSpeed(0U);
-					}
-
-					else if (4000 < motorTwoTimer <= 7500) // 3.5 secs
-					{
-						// MotorTwo run backward for 3.5 secs
-						SetMotorTwoDirection(BACKWARD);
-						SetMotorTwoSpeed(70U);
-					}
-
-					else if (7500 < motorTwoTimer <= 12500) // 5 secs
-					{
-						// MotorTwo pause for 5 secs
-						SetMotorTwoSpeed(0U);
-					}
-
-					else
-					{
-						// End of one cycle
-						u32TestCounterTwo_new++;
-						motorTwoTimer = 0;
-					}
-
-					// if (flag_motorTwo_forward)
-					// {
-
-					// 	if (false == max_pos_flagTwo)
-					// 	{
-					// 		MotorTwo_move_forward_pulse();
-					// 	}
-					// 	else
-					// 	{
-					// 		if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
-					// 		{
-					// 			flag_motorTwo_forward = false;
-					// 			blflag_speed_check = false; // prepare for next check
-					// 			max_pos_flagTwo = false;
-					// 			bl_tick_move_backward_time = true;
-					// 			// nowtime_ms = u32GetTime_ms();
-					// 		}
-					// 	}
-					// }
-					// else
-					// {
-					// 	if (false == max_pos_flagTwo)
-					// 	{
-					// 		MotorTwo_move_backward_pulse();
-					// 	}
-					// 	else // max position reached, set flag for next cycle
-					// 	{
-					// 		if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
-					// 		{
-					// 			flag_motorTwo_forward = true;
-					// 			blflag_speed_check = false; // prepare for next check
-					// 			max_pos_flagTwo = false;
-					// 			bl_tick_move_forward_time = true;
-					// 			// nowtime_ms = u32GetTime_ms();
-					// 			encoderTwoCounter = 0;
-					// 			updateLED_flag = true;
-					// 			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
-					// 			{
-					// 				EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-					// 				vDelay_ticks(800U);
-					// 			}
-					// 		}
-					// 	}
-					// }
-
-					save_eeprom = true;
+					// MotorTwo run forward for 3 secs
+					SetMotorTwoDirection(FORWARD);
+					SetMotorTwoSpeed(70U);
 				}
 
-				// MotorTwo error -> Stop MotorTwo
+				else if (3000 < motorTwoTimer <= 4000) // 1 sec
+				{
+					// MotorTwo pause for 1 sec
+					SetMotorTwoSpeed(0U);
+				}
+
+				else if (4000 < motorTwoTimer <= 7500) // 3.5 secs
+				{
+					// MotorTwo run backward for 3.5 secs
+					SetMotorTwoDirection(BACKWARD);
+					SetMotorTwoSpeed(70U);
+				}
+
+				else if (7500 < motorTwoTimer <= 12500) // 5 secs
+				{
+					// MotorTwo pause for 5 secs
+					SetMotorTwoSpeed(0U);
+				}
+
 				else
 				{
-					SetMotorTwoSpeed(0U); // Stop MotorTwo
+					// End of one cycle
+					u32TestCounterTwo_new++;
+					motorTwoTimer = 0;
 				}
+
+				// if (flag_motorTwo_forward)
+				// {
+
+				// 	if (false == max_pos_flagTwo)
+				// 	{
+				// 		MotorTwo_move_forward_pulse();
+				// 	}
+				// 	else
+				// 	{
+				// 		if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
+				// 		{
+				// 			flag_motorTwo_forward = false;
+				// 			blflag_speed_check = false; // prepare for next check
+				// 			max_pos_flagTwo = false;
+				// 			bl_tick_move_backward_time = true;
+				// 			// nowtime_ms = u32GetTime_ms();
+				// 		}
+				// 	}
+				// }
+				// else
+				// {
+				// 	if (false == max_pos_flagTwo)
+				// 	{
+				// 		MotorTwo_move_backward_pulse();
+				// 	}
+				// 	else // max position reached, set flag for next cycle
+				// 	{
+				// 		if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+				// 		{
+				// 			flag_motorTwo_forward = true;
+				// 			blflag_speed_check = false; // prepare for next check
+				// 			max_pos_flagTwo = false;
+				// 			bl_tick_move_forward_time = true;
+				// 			// nowtime_ms = u32GetTime_ms();
+				// 			encoderTwoCounter = 0;
+				// 			updateLED_flag = true;
+				// 			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+				// 			{
+				// 				EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+				// 				vDelay_ticks(800U);
+				// 			}
+				// 		}
+				// 	}
+				// }
+
+				save_eeprom = true;
 			}
 
-			// Motor Switch is off -> Motors stop running
+			// MotorTwo error -> Stop MotorTwo
 			else
 			{
-				// Motors stop here?
-				//
-				//
-				pwmSetDuty(hetRAM1, pwm1, 0U); // MotorOne stop
-				SetMotorTwoSpeed(0U);		   // Stop MotorTwo
-
-				// if (save_eeprom)
-				// {
-				// 	// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-				// 	// vDelay_ticks(8000U);
-				// 	save_eeprom = false;
-				// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
-				// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
-				// }
+				SetMotorTwoSpeed(0U); // Stop MotorTwo
 			}
+			// }
+
+			// Motor Switch is off -> Motors stop running
+			// 	else
+			// 	{
+			// 		// Motors stop here?
+			// 		//
+			// 		//
+			// 		pwmSetDuty(hetRAM1, pwm1, 0U); // MotorOne stop
+			// 		SetMotorTwoSpeed(0U);		   // Stop MotorTwo
+
+			// 		// if (save_eeprom)
+			// 		// {
+			// 		// 	// EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+			// 		// 	// vDelay_ticks(8000U);
+			// 		// 	save_eeprom = false;
+			// 		// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
+			// 		// 	SetMotorTwoSpeed(0); // set duty cycle to 0//
+			// 		// }
+			// 	}
 		}
 
 		/***************************************************End of Motor Two code***************************************************/
@@ -1961,7 +1961,7 @@ void main(void)
 }
 
 /* USER CODE BEGIN (4) */
-void rtiNotification(rtiBASE_t * rtiREG, uint32 notification)
+void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
 {
 	// gioSetPort(gioPORTB, gioGetPort(gioPORTB) ^ 0b00001000);		// Toggle GIOB3
 	u32SystemTimer_1ms++;
@@ -1970,32 +1970,32 @@ void rtiNotification(rtiBASE_t * rtiREG, uint32 notification)
 	vCheckSwitchStatus();
 }
 
-	/*for testing*/
+/*for testing*/
 
-	/****************Not used only for testing****************/
-	/*
-	pwmSetDuty(hetRAM1, pwm2, 50U);//set duty cycle and porting to pin NHET00//
-	uRotary = getRotaryPosition();//Initialize rotary//
-	uRotaryLastVal = uRotary;//Initialize rotary//
-	*/
-	/****************Not used only for testing****************/
+/****************Not used only for testing****************/
+/*
+pwmSetDuty(hetRAM1, pwm2, 50U);//set duty cycle and porting to pin NHET00//
+uRotary = getRotaryPosition();//Initialize rotary//
+uRotaryLastVal = uRotary;//Initialize rotary//
+*/
+/****************Not used only for testing****************/
 
-	// Var_Disp(rd_data[0]);
+// Var_Disp(rd_data[0]);
 
-	// send data through can bus//
-	// can_transmit();//can_bus transmit//
-	// can_receive();//can_bus receive//
-	// can_rx_disp(can_datrx);//display data receive//
+// send data through can bus//
+// can_transmit();//can_bus transmit//
+// can_receive();//can_bus receive//
+// can_rx_disp(can_datrx);//display data receive//
 
-	// Light_Sens_Disp();//Display Light Sensor Reading//
-	// Temp_Sens_Disp();//Display Temperatur Sensor Reading//
+// Light_Sens_Disp();//Display Light Sensor Reading//
+// Temp_Sens_Disp();//Display Temperatur Sensor Reading//
 
-	// pwmSetDuty(hetRAM1, pwm1, Duty1);
-	// CheckRotary();//read encoder//
-	// Encod_Disp();//Display Encoder Reading//
-	/*********/
+// pwmSetDuty(hetRAM1, pwm1, Duty1);
+// CheckRotary();//read encoder//
+// Encod_Disp();//Display Encoder Reading//
+/*********/
 
-	/*for testing*/
-	// pos=getPWM(1,1);//get position//
-	// Pin_Disp(pin_bit);//Display Pin PWM counter//
-	/********/
+/*for testing*/
+// pos=getPWM(1,1);//get position//
+// Pin_Disp(pin_bit);//Display Pin PWM counter//
+/********/

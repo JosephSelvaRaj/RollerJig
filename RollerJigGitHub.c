@@ -58,6 +58,7 @@ uint16_t switch_on_cntr = 0;
 uint16_t switch_off_cntr = 0;
 boolean flag_switch_on = false;
 
+// DisplayTwo Pinout
 #define CLOCK2_PIN 3U
 #define LATCH2_PIN 4U
 #define DATA2_PIN 5U
@@ -1331,6 +1332,22 @@ void Motor_move_backward_pulse(void)
 // }
 
 /********************************************START OF MOTOR TWO FUNCTION DEFINITIONS*********************************************/
+
+void vUpdateDisplayError_01(void)
+{
+	uint8_t index = 0;
+
+	for (index = 0; index < 8; index++)
+	{
+		gioSetBit(LED_PORT, LATCH_PIN, PIN_LOW);
+		DisplayDigit(digits_CommAnode[au8ErrorInfo[index]]);
+		DisplayDigit(Segment_CommAnode[index]);
+		gioSetBit(LED_PORT, LATCH_PIN, PIN_HIGH);
+		// vDelay_ticks(3000U);
+		vDelay_ticks(100);
+	}
+}
+
 void loadCountersFromEEPROM(void)
 {
 	// uint8_t loadBufferArray = {0};
@@ -1908,15 +1925,23 @@ void main(void)
 		}
 
 		/***************************************************End of Motor Two code***************************************************/
-		vUpdateDisplay8Digit(u32TestCounter_new); // Display MotorOne counter on DisplayOne
-
-		if (!flag_motor_error)
+		
+		if (!flag_motor_error)	//If no MotorOne error
 		{
-			vUpdateDisplay8Digit_02(u32SpeedAve); // Display MotorOne RPM on Display2; display average speed --- 31Oct change
+			vUpdateDisplay8Digit(u32TestCounter_new); // Display MotorOne counter on DisplayOne
 		}
 		else
 		{
-			vUpdateDisplayError_02(); // Else display Error Message on Display2
+			vUpdateDisplayError_01(); // Else display Error Message on DisplayOne
+		}
+
+		if (!flag_motorTwo_error)	//If no MotorTwo error
+		{
+			vUpdateDisplay8Digit_02(u32TestCounterTwo_new); // Display MotorTwo counter on DisplayTwo
+		}
+		else
+		{
+			vUpdateDisplayError_02(); // Else display Error Message on DisplayTwo
 		}
 
 		if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
@@ -1927,7 +1952,7 @@ void main(void)
 			bl_tick_move_forward_time = true;
 			i32EncPulse_cntr = 0;
 			updateLED_flag = true;
-			if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
+			if ((u32TestCounter_new % 12U) == 0) // every 12 cycles save once
 			{
 				EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
 				vDelay_ticks(800U);

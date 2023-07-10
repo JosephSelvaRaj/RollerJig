@@ -1059,8 +1059,8 @@ void Motor_move_forward_pulse(void)
 	}
 	// move forward
 	gioSetBit(gioPORTA, 7, PIN_HIGH); // set pin 3 output as 1//
-	flag_motor2_forward = true;
-	flag_motor2_stop = false;
+	flag_motor_forward = true;
+	flag_motor_stop = false;
 
 	uint8_t time_index = 0;
 	uint32_t u32Temp_ms = 0;
@@ -1069,7 +1069,7 @@ void Motor_move_forward_pulse(void)
 	// now check whether timeout or not
 	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
 	{
-		flag_motor2_error = true;
+		flag_motor_error = true;
 	}
 	else
 	{
@@ -1086,7 +1086,7 @@ void Motor_move_forward_pulse(void)
 			{
 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
 				{
-					flag_motor2_error = true;
+					flag_motor_error = true;
 				}
 				blflag_speed_check = true; // check no issue
 			}
@@ -1100,8 +1100,8 @@ void Motor_move_forward_pulse(void)
 			// stop motor first
 			pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
 			pwmSetDuty(hetRAM1, pwm1, 0); // set duty cycle to 0//
-			flag_motor2_stop = true;
-			flag_motor2_forward = false;
+			flag_motor_stop = true;
+			flag_motor_forward = false;
 
 			// updateLED_flag = true;
 			// motor_forward = false;
@@ -1358,133 +1358,133 @@ void SetMotorTwoSpeed(uint32 spdB)
 	pwmSetDuty(hetRAM1, pwm0, spdB);
 }
 
-void MotorTwo_move_forward_pulse(void)
-{
-	static boolean first_run = true;
-	static boolean wait_start = true;
-	if (bl_tick_move_forward_timeTwo)
-	{
-		nowtime_ms = u32GetTime_ms();
-		bl_tick_move_forward_timeTwo = false;
-		encoderTwoCounter = 0U;
-	}
-	// move forward
-	SetMotorTwoDirection(PIN_HIGH); // set pin 3 output as 1//
-	flag_motorTwo_forward = true;
-	flag_motorTwo_backward = false;
-	max_pos_flagTwo = false;
+// void MotorTwo_move_forward_pulse(void)
+// {
+// 	static boolean first_run = true;
+// 	static boolean wait_start = true;
+// 	if (bl_tick_move_forward_timeTwo)
+// 	{
+// 		nowtime_ms = u32GetTime_ms();
+// 		bl_tick_move_forward_timeTwo = false;
+// 		encoderTwoCounter = 0U;
+// 	}
+// 	// move forward
+// 	SetMotorTwoDirection(PIN_HIGH); // set pin 3 output as 1//
+// 	flag_motorTwo_forward = true;
+// 	flag_motorTwo_backward = false;
+// 	max_pos_flagTwo = false;
 
-	uint8_t time_index = 0;
-	uint32_t u32Temp_ms = 0;
-	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
+// 	uint8_t time_index = 0;
+// 	uint32_t u32Temp_ms = 0;
+// 	uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
 
-	// now check whether timeout or not
-	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
-	{
-		flag_motorTwo_error = true;
-	}
-	else
-	{
-		// ramp up region
-		if (encoderTwoCounter <= RAMP_UP_PULSE_END)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX); // set duty cycle to individual //
-		}
-		else if (encoderTwoCounter < CONST_SPEED_PULSE_END)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
-			// only check motor speed here
-			if ((encoderTwoCounter > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
-			{
-				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-				{
-					flag_motorTwo_error = true;
-				}
-				blflag_speed_check = true; // check no issue
-			}
-		}
-		else if (encoderTwoCounter < RAMP_DOWN_PULSE_END)
-		{
-			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to individual //
-		}
-		else
-		{
-			// stop motor first
-			SetMotorTwoSpeed(0); // set duty cycle to 0//
-			SetMotorTwoSpeed(0); // set duty cycle to 0//
-			max_pos_flagTwo = true;
+// 	// now check whether timeout or not
+// 	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
+// 	{
+// 		flag_motorTwo_error = true;
+// 	}
+// 	else
+// 	{
+// 		// ramp up region
+// 		if (encoderTwoCounter <= RAMP_UP_PULSE_END)
+// 		{
+// 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX); // set duty cycle to individual //
+// 		}
+// 		else if (encoderTwoCounter < CONST_SPEED_PULSE_END)
+// 		{
+// 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
+// 			// only check motor speed here
+// 			if ((encoderTwoCounter > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
+// 			{
+// 				if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+// 				{
+// 					flag_motorTwo_error = true;
+// 				}
+// 				blflag_speed_check = true; // check no issue
+// 			}
+// 		}
+// 		else if (encoderTwoCounter < RAMP_DOWN_PULSE_END)
+// 		{
+// 			SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to individual //
+// 		}
+// 		else
+// 		{
+// 			// stop motor first
+// 			SetMotorTwoSpeed(0); // set duty cycle to 0//
+// 			SetMotorTwoSpeed(0); // set duty cycle to 0//
+// 			max_pos_flagTwo = true;
 
-			// updateLED_flag = true;
-			// motor_forward = false;
-			blflag_speed_check = false; // prepare for next check
+// 			// updateLED_flag = true;
+// 			// motor_forward = false;
+// 			blflag_speed_check = false; // prepare for next check
 
-			u32move_forward_waiting_ms = u32GetTime_ms();
-		}
-	}
-}
+// 			u32move_forward_waiting_ms = u32GetTime_ms();
+// 		}
+// 	}
+// }
 
-void MotorTwo_move_backward_pulse(void)
-{
-	// move backward
-	SetMotorTwoDirection(BACKWARD);
-	flag_motorTwo_backward = true;
-	flag_motorTwo_forward = false;
-	uint32_t u32Temp_ms = 0;
-	static uint32_t u32TimePast_ms;
+// void MotorTwo_move_backward_pulse(void)
+// {
+// 	// move backward
+// 	SetMotorTwoDirection(BACKWARD);
+// 	flag_motorTwo_backward = true;
+// 	flag_motorTwo_forward = false;
+// 	uint32_t u32Temp_ms = 0;
+// 	static uint32_t u32TimePast_ms;
 
-	if (bl_tick_move_backward_time)
-	{
-		nowtime_ms = u32GetTime_ms();
-		bl_tick_move_backward_time = false;
-	}
+// 	if (bl_tick_move_backward_time)
+// 	{
+// 		nowtime_ms = u32GetTime_ms();
+// 		bl_tick_move_backward_time = false;
+// 	}
 
-	u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
-	// now check whether timeout or not
-	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
-	{
-		flag_motorTwo_error = true;
-	}
-	else
-	{
-		SetMotorTwoSpeed(70U);
+// 	u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
+// 	// now check whether timeout or not
+// 	if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
+// 	{
+// 		flag_motorTwo_error = true;
+// 	}
+// 	else
+// 	{
+// 		SetMotorTwoSpeed(70U);
 
-		// // ramp up region
-		// if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
-		// {
-		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
-		// }
-		// else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
-		// {
-		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
+// 		// // ramp up region
+// 		// if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
+// 		// {
+// 		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
+// 		// }
+// 		// else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
+// 		// {
+// 		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
 
-		// 	if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
-		// 	{
-		// 		if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-		// 		{
-		// 			flag_motorTwo_error = true;
-		// 		}
-		// 		blflag_speed_check = true; // check no issue
-		// 	}
-		// }
-		// else if (encoderTwoCounter > 3U)
-		// {
-		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
-		// }
-		// else
-		// {
-		// 	SetMotorTwoSpeed(0U);
-		// 	if (!flag_motorTwo_error)
-		// 	{
-		// 		u32TestCounter_new++;
-		// 	}
-		// 	blflag_speed_check = false; // prepare for next speed check
+// 		// 	if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
+// 		// 	{
+// 		// 		if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+// 		// 		{
+// 		// 			flag_motorTwo_error = true;
+// 		// 		}
+// 		// 		blflag_speed_check = true; // check no issue
+// 		// 	}
+// 		// }
+// 		// else if (encoderTwoCounter > 3U)
+// 		// {
+// 		// 	SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
+// 		// }
+// 		// else
+// 		// {
+// 		// 	SetMotorTwoSpeed(0U);
+// 		// 	if (!flag_motorTwo_error)
+// 		// 	{
+// 		// 		u32TestCounter_new++;
+// 		// 	}
+// 		// 	blflag_speed_check = false; // prepare for next speed check
 
-		// 	max_pos_flagTwo = true;
+// 		// 	max_pos_flagTwo = true;
 
-		// 	u32move_backwardTwo_waiting_ms = u32GetTime_ms();
-		// }
-	}
-}
+// // 		// 	u32move_backwardTwo_waiting_ms = u32GetTime_ms();
+// // 		// }
+// // 	}
+// }
 
 /********************************************END OF MOTOR TWO FUNCTION DEFINITIONS*********************************************/
 //////**********************End of Initialization***********************/////
@@ -1723,7 +1723,7 @@ void main(void)
 		if (u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
 		{
 			u32TimerTwo_100ms++;
-			u32Speed_rpmTwo = (uint32_t)(100 * u32MotorEncPosition); // Havent change
+			u32Speed_rpmTwo = (uint32_t)(100 * encoderTwoCounter); // Havent change
 			u32SpeedSumTwo = u32SpeedSumTwo + u32Speed_rpmTwo;
 			u8IndexTwo++;
 			if (u8IndexTwo > 3)
@@ -1750,7 +1750,7 @@ void main(void)
 				}
 			}
 
-			u32MotorEncPosition = 0; // Havent Change
+			encoderTwoCounter = 0; // Havent Change
 			u32SpeedTimerTwo_ms = u32SystemTimer_1ms;
 			// EEPROM_writeCounterData(u32TestCounter, u32SpeedAve, COUNTER_EEPROM_ADD);
 		}

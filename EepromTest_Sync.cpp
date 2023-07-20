@@ -93,17 +93,25 @@
 /* USER CODE BEGIN (2) */
 #define UART sciREG1
 
-#define TSIZE3 19
-uint8 TEXT3[TSIZE3] = {'T', 'E', 'X', 'A', 'S', ' ', 'I', 'N', 'S', 'T', 'R', 'U', 'M', 'E', 'N', 'T', 'S', '\n', '\r'};
+#define TSIZE10 19
+uint8 TEXT10[TSIZE10] = {'T', 'E', 'X', 'A', 'S', ' ', 'I', 'N', 'S', 'T', 'R', 'U', 'M', 'E', 'N', 'T', 'S', '\n', '\r'};
 
 #define SPACESIZE 1
 uint8 SPACE[SPACESIZE] = {' '};
 #define BREAKSIZE 2
 uint8 BREAK[BREAKSIZE] = {'\n', '\r'};
 #define TSIZE1 23
-uint8 TEXT1[TSIZE1] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D',' ', 'C', 'O', 'U', 'N ', 'T', 'E', 'R', 'O', 'N', 'E', ':', ' ', ' '};
+uint8 TEXT1[TSIZE1] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D', ' ', 'C', 'O', 'U', 'N', 'T', 'E', 'R', 'O', 'N', 'E', ':', ' ', ' '};
 #define TSIZE2 23
-uint8 TEXT2[TSIZE2] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D',' ', 'C', 'O', 'U', 'N ', 'T', 'E', 'R', 'T', 'W', 'O', ':', ' ', ' '};
+uint8 TEXT2[TSIZE2] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D', ' ', 'C', 'O', 'U', 'N', 'T', 'E', 'R', 'T', 'W', 'O', ':', ' ', ' '};
+#define TSIZE3 18
+uint8_t TEXT3[TSIZE3] = {'S', 'a', 'v', 'e', 'd', ' ', 'C', 'o', 'u', 'n', 't', 'e', 'r', 'O', 'n', 'e', ':', ' '};
+#define TSIZE4 18
+uint8_t TEXT4[TSIZE4] = {'S', 'a', 'v', 'e', 'd', ' ', 'C', 'o', 'u', 'n', 't', 'e', 'r', 'T', 'w', 'o', ':', ' '};
+#define TSIZE5 17
+uint8_t TEXT5[TSIZE5] = {'C', 'o', 'u', 'n', 't', 'e', 'r', 'O', 'n', 'e', ' ', 'N', 'o', 'w', ':', ' ', ' '};
+#define TSIZE6 17
+uint8_t TEXT6[TSIZE6] = {'C', 'o', 'u', 'n', 't', 'e', 'r', 'T', 'w', 'o', ' ', 'N', 'o', 'w', ':', ' ', ' '};
 
 const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x01;
@@ -112,6 +120,7 @@ const int mainCountersTotalByteSize = 16U;
 int EepromSaveInterval = 60000;     // Every 60 seconds
 int CouterIncrementInterval = 1000; // Every 1 second
 uint32_t flush = 0;
+uint32_t flushTwo = 1;
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 1;
 volatile bool saveEepromFlag = false;
@@ -140,7 +149,7 @@ void flushEEPROM(void)
 {
     uint8_t writeBufferArray[16];
     memcpy(writeBufferArray, &flush, 4U);
-    memcpy(writeBufferArray + 4, &flush, 4U);
+    memcpy(writeBufferArray + 4, &flushTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
 }
 
@@ -191,7 +200,7 @@ int main(void)
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
-    // flushEEPROM();
+    flushEEPROM();
     loadCountersFromEEPROM();
 
     /* Enable RTI Compare 0 interrupt notification */
@@ -207,6 +216,7 @@ int main(void)
     sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
     sciDisplayText(UART, &TEXT2[0], TSIZE2);    /* send text code 3 */
     sciPrintDecimal(UART, mainCounterTwo);
+    sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
 
     wait(200);
     /* Run forever */
@@ -217,11 +227,12 @@ int main(void)
             // Increment counters every 1 sec
             mainCounterOne++;
             mainCounterTwo++;                        // one value higher than mainCounterOne
-            sciDisplayText(UART, &TEXT1[0], TSIZE1); /* send text code 3 */
+            sciDisplayText(UART, &TEXT5[0], TSIZE5); /* send text code 3 */
             sciPrintDecimal(UART, mainCounterOne);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-            sciDisplayText(UART, &TEXT2[0], TSIZE2);    /* send text code 3 */
+            sciDisplayText(UART, &TEXT6[0], TSIZE6);    /* send text code 3 */
             sciPrintDecimal(UART, mainCounterTwo);
+            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
             incrementCounterFlag = false;
         }
 
@@ -229,6 +240,12 @@ int main(void)
         {
             // Save counters to EEPROM every 60 sec
             saveCountersToEEPROM();
+            sciDisplayText(UART, &TEXT1[0], TSIZE1); /* send text code 3 */
+            sciPrintDecimal(UART, mainCounterOne);
+            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+            sciDisplayText(UART, &TEXT2[0], TSIZE2);    /* send text code 3 */
+            sciPrintDecimal(UART, mainCounterTwo);
+            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
             saveEepromFlag = false;
         }
     }

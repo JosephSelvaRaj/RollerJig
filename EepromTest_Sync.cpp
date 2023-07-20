@@ -111,6 +111,7 @@ const int mainCountersTotalByteSize = 16U;
 
 int EepromSaveInterval = 60000;     // Every 60 seconds
 int CouterIncrementInterval = 1000; // Every 1 second
+int flush = 0;
 uint32_t mainCounterOne = 0U;
 uint32_t mainCounterTwo = 1U;
 volatile bool saveEepromFlag = false;
@@ -132,6 +133,14 @@ void saveCountersToEEPROM(void)
     uint8_t writeBufferArray[16];
     memcpy(writeBufferArray, &mainCounterOne, 4U);
     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
+    TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
+}
+
+void flushEEPROM(void)
+{
+    uint8_t writeBufferArray[16];
+    memcpy(writeBufferArray, &flush, 4U);
+    memcpy(writeBufferArray + 4, &flush, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
 }
 
@@ -179,6 +188,8 @@ int main(void)
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
+
+    //flushEEPROM();
     loadCountersFromEEPROM();
 
     /* Enable RTI Compare 0 interrupt notification */

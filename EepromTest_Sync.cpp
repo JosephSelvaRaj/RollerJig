@@ -259,7 +259,6 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     /***********************60 Seconds timer***********************/
     if (eepromTimerCounter >= EepromSaveInterval)
     {
-
         saveEepromFlag = true;
         eepromTimerCounter = 0U;
     }

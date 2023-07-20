@@ -181,6 +181,7 @@ volatile uint32_t u32TimerTwo_100ms = 0;
 volatile uint8_t u8IndexTwo = 0;
 volatile uint32_t u32ErrorHappenTwo_cntr = 0;
 volatile int motorTwoTimer = 0;
+volatile uint8_t stateMotorTwo = 0;
 
 volatile uint32_t u32TestCounterTwo_new = 0;
 uint32_t u32move_backwardTwo_waiting_ms = 0;
@@ -1805,123 +1806,79 @@ void main(void)
                 bl_tick_move_backward_time = false;
                 max_pos_flagTwo = false;
                 motorTwoTimer = 0;
+                stateMotorTwo = 1;
             }
         }
         // Else not first reset
         else
         {
-            // Motor Switch is on -> Motor continue running
-            // if (flag_switch_on)
-            // {
-            // No motor error -> Motor continue running
-            if (!flag_motorTwo_error)
-            {
-                if (motorTwoTimer <= 3000) // 3secs
-                {
-                    // MotorTwo run forward for 3 secs
-                    SetMotorTwoDirection(FORWARD);
-                    SetMotorTwoSpeed(70U);
-                }
+            switch (stateMotorTwo)
+                    {
+                    case 1:
+                        // Motors forward state 3 sec
+                        SetMotorTwoDirection(FORWARD);
+                        //startMotorTwoTimer = true;
+                        if (motorTwoTimer <= 3000)
+                        {
+                            SetMotorTwoSpeed(70U);
+                        }
+                        else
+                        {
+                            //startmotorTwoTimer = false;
+                            motorTwoTimer = 0;
+                            stateMotorTwo = 2;
+                        }
+                        break;
 
-                else if (3000 < motorTwoTimer <= 4000) // 1 sec
-                {
-                    // MotorTwo pause for 1 sec
-                    SetMotorTwoSpeed(0U);
-                }
+                    case 2:
+                        // 1 sec pause state
+                        //startMotorTwoTimer = true;
+                        if (motorTwoTimer <= 1000)
+                        {
+                            SetMotorTwoSpeed(0U);
+                        }
+                        else
+                        {
+                            //startMotorTwoTimer = false;
+                            motorTwoTimer = 0;
+                            stateMotorTwo = 3;
+                        }
+                        break;
 
-                else if (4000 < motorTwoTimer <= 7500) // 3.5 secs
-                {
-                    // MotorTwo run backward for 3.5 secs
-                    SetMotorTwoDirection(BACKWARD);
-                    SetMotorTwoSpeed(70U);
-                }
+                    case 3:
+                        // Motors backward state 3.5 sec
+                        SetMotorTwoDirection(BACKWARD);
+                        //startMotorTwoTimer = true;
+                        if (motorTwoTimer <= 3500)
+                        {
+                            SetMotorTwoSpeed(70U);
+                        }
+                        else
+                        {
+                            //startMotorTwoTimer = false;
+                            motorTwoTimer = 0;
+                            stateMotorTwo = 4;
+                        }
+                        break;
 
-                else if (7500 < motorTwoTimer <= 12500) // 5 secs
-                {
-                    // MotorTwo pause for 5 secs
-                    SetMotorTwoSpeed(0U);
-                }
+                    case 4:
+                        // Motors 5 sec end-of-cycle pause state
+                        //startMotorTwoTimer = true;
+                        if (motorTwoTimer <= 5000)
+                        {
+                            SetMotorTwoSpeed(0U);
+                        }
+                        else
+                        {
+                            //startMotorTwoTimer = false;
+                            motorTwoTimer = 0;
+                            stateMotorTwo = 1;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
 
-                else
-                {
-                    // End of one cycle
-                    u32TestCounterTwo_new++;
-                    motorTwoTimer = 0;
-                }
-
-                // if (flag_motorTwo_forward)
-                // {
-
-                //  if (false == max_pos_flagTwo)
-                //  {
-                //      MotorTwo_move_forward_pulse();
-                //  }
-                //  else
-                //  {
-                //      if ((u32GetTimeSliceDuration_ms(u32move_forward_waiting_ms) > 1000U)) // delay for 1000ms
-                //      {
-                //          flag_motorTwo_forward = false;
-                //          blflag_speed_check = false; // prepare for next check
-                //          max_pos_flagTwo = false;
-                //          bl_tick_move_backward_time = true;
-                //          // nowtime_ms = u32GetTime_ms();
-                //      }
-                //  }
-                // }
-                // else
-                // {
-                //  if (false == max_pos_flagTwo)
-                //  {
-                //      MotorTwo_move_backward_pulse();
-                //  }
-                //  else // max position reached, set flag for next cycle
-                //  {
-                //      if ((u32GetTimeSliceDuration_ms(u32move_backwardTwo_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
-                //      {
-                //          flag_motorTwo_forward = true;
-                //          blflag_speed_check = false; // prepare for next check
-                //          max_pos_flagTwo = false;
-                //          bl_tick_move_forward_time = true;
-                //          // nowtime_ms = u32GetTime_ms();
-                //          encoderTwoCounter = 0;
-                //          updateLED_flag = true;
-                //          if ((u32TestCounter_new % 12U) == 0) // every 12 cyles save once
-                //          {
-                //              EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-                //              vDelay_ticks(800U);
-                //          }
-                //      }
-                //  }
-                // }
-
-                save_eeprom = true;
-            }
-
-            // MotorTwo error -> Stop MotorTwo
-            else
-            {
-                SetMotorTwoSpeed(0U); // Stop MotorTwo
-            }
-            // }
-
-            // Motor Switch is off -> Motors stop running
-            //  else
-            //  {
-            //      // Motors stop here?
-            //      //
-            //      //
-            //      pwmSetDuty(hetRAM1, pwm1, 0U); // MotorOne stop
-            //      SetMotorTwoSpeed(0U);          // Stop MotorTwo
-
-            //      // if (save_eeprom)
-            //      // {
-            //      //  // EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-            //      //  // vDelay_ticks(8000U);
-            //      //  save_eeprom = false;
-            //      //  SetMotorTwoSpeed(0); // set duty cycle to 0//
-            //      //  SetMotorTwoSpeed(0); // set duty cycle to 0//
-            //      // }
-            //  }
         }
 
         /***************************************************End of Motor Two code***************************************************/

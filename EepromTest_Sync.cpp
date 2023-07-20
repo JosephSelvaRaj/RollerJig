@@ -43,13 +43,23 @@
 
 
 /* USER CODE BEGIN (0) */
+
 /*********************************************FLOW OF EVENTS*********************************************/
 // To test the writing to EEPROM and then loading back the correct values via "Serial Monitor"
 // 1. Load counters from EEPROM
 // 2. Start RTI timer
 // 3. Every 1 second, increment counters
 // 4. Every 60 seconds, save counters to EEPROM
+//
+// Notes:
+// * Two counters used. Only difference is 2nd counter will have higher value by 1. Just to see if both values
+//  will get corrupted.
+// * LED (HET Pin 0) is just an indicator for your free use to put anywhere. Will toggle on & off
+//
+// Outstanding things to do:
+// * Figure out Serial monitor to read the values from EEPROM
 /********************************************************************************************************/
+
 /* USER CODE END */
 
 /* Include Files */

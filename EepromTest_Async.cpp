@@ -93,7 +93,7 @@ const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x01;
 const int mainCountersTotalByteSize = 16U;
 
-int EepromSaveInterval = 60000;     // Every 60 seconds
+int EepromSaveInterval = 20000;     // Every 20 seconds
 int CouterIncrementInterval = 1000; // Every 1 second
 int mainCounterOne = 30U;
 int mainCounterTwo = 31U;

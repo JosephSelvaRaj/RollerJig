@@ -136,6 +136,9 @@ void main(void)
 
     /* Initialize RTI driver */
     rtiInit();
+    
+    /* initialize sci/sci-lin    */
+    sciInit();
 
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);

@@ -147,10 +147,10 @@ void saveCountersToEEPROM(void)
 
 void flushEEPROM(void)
 {
-    uint8_t writeBufferArray[16];
-    memcpy(writeBufferArray, &flush, 4U);
-    memcpy(writeBufferArray + 4, &flushTwo, 4U);
-    TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
+    uint8_t flushBufferArray[16];
+    memcpy(flushBufferArray, &flush, 4U);
+    memcpy(flushBufferArray + 4, &flushTwo, 4U);
+    TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)flushBufferArray);
 }
 
 void sciPrintDecimal(sciBASE_t *sci, uint32_t value)
@@ -240,10 +240,10 @@ int main(void)
         {
             // Save counters to EEPROM every 60 sec
             saveCountersToEEPROM();
-            sciDisplayText(UART, &TEXT1[0], TSIZE1); /* send text code 3 */
+            sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
             sciPrintDecimal(UART, mainCounterOne);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-            sciDisplayText(UART, &TEXT2[0], TSIZE2);    /* send text code 3 */
+            sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
             sciPrintDecimal(UART, mainCounterTwo);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
             saveEepromFlag = false;

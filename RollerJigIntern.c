@@ -409,7 +409,6 @@ int main(void)
 
     while (1)
     {
-
         switch (stateMotorOne)
         {
         case 1:
@@ -496,7 +495,7 @@ int main(void)
 
 /* USER CODE BEGIN (4) */
 
-//**ISR Definition**//
+/**************************************************ISR Definition***************************************************/
 
 void gioNotification(gioPORT_t *port, uint32 bit)
 {
@@ -552,4 +551,5 @@ void esmGroup2Notification(int bit)
     return;
 }
 
+/**************************************************End of ISR Definition***************************************************/
 /* USER CODE END */

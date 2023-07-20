@@ -41,7 +41,15 @@
  *
  */
 
+
 /* USER CODE BEGIN (0) */
+/*********************************************FLOW OF EVENTS*********************************************/
+// To test the writing to EEPROM and then loading back the correct values via "Serial Monitor"
+// 1. Load counters from EEPROM
+// 2. Start RTI timer
+// 3. Every 1 second, increment counters
+// 4. Every 60 seconds, save counters to EEPROM
+/********************************************************************************************************/
 /* USER CODE END */
 
 /* Include Files */

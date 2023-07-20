@@ -101,9 +101,9 @@ uint8 SPACE[SPACESIZE] = {' '};
 #define BREAKSIZE 2
 uint8 BREAK[BREAKSIZE] = {'\n', '\r'};
 #define TSIZE1 23
-uint8 TEXT1[TSIZE1] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E,' D ',' ',' C ',' O ',' U',' N ',' T ',' E ',' R ',' O ',' N ',' E ',':',' ',' '};
+uint8 TEXT1[TSIZE1] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D',' ', 'C', 'O', 'U', 'N ', 'T', 'E', 'R', 'O', 'N', 'E', ':', ' ', ' '};
 #define TSIZE2 23
-uint8 TEXT2[TSIZE2] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E,' D ',' ',' C ',' O ',' U',' N ',' T ',' E ',' R ',' T ',' W ',' O ',':',' ',' '};
+uint8 TEXT2[TSIZE2] = {'R', 'E', 'T', 'R', 'I', 'E', 'V', 'E', 'D',' ', 'C', 'O', 'U', 'N ', 'T', 'E', 'R', 'O', 'N', 'E', ':', ' ', ' '};
 
 const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x01;

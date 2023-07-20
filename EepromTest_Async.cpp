@@ -71,12 +71,12 @@
 #include "HL_system.h"
 #include "HL_sci.h"
 
-#define  TSIZE1 6
-uint8  TEXT1[TSIZE1]= {'S','A','V','E','D',' '};
-#define  TSIZE2 1
-uint8  TEXT2[TSIZE2]= {' '};
-#define  TSIZE3 2
-uint8  TEXT3[TSIZE3]= {'\n','\r'};
+#define  SAVEDSIZE 6
+uint8  SAVED[SAVEDSIZE]= {'S','A','V','E','D',' '};
+#define SPACESIZE 1
+uint8  SPACE[SPACESIZE]= {' '};
+#define BREAKSIZE 2
+uint8  BREAK[BREAKSIZE]= {'\n','\r'};
 
 /* USER CODE END */
 
@@ -136,7 +136,7 @@ void main(void)
 
     /* Initialize RTI driver */
     rtiInit();
-    
+
     /* initialize sci/sci-lin    */
     sciInit();
 
@@ -168,11 +168,11 @@ void main(void)
         {
             // Save counters to EEPROM every 60 sec
             saveCountersToEEPROM();
-            sciDisplayText(UART,&TEXT1[0],TSIZE1);
+            sciDisplayText(UART,&SAVED[0],SAVEDSIZE);
             sciPrintDecimal(UART, mainCounterOne);
-            sciDisplayText(UART,&TEXT2[0],TSIZE2);
+            sciDisplayText(UART,&SPACE[0],SPACESIZE);
             sciPrintDecimal(UART, mainCounterTwo);
-            sciDisplayText(UART,&TEXT3[0],TSIZE3);
+            sciDisplayText(UART,&BREAK[0],BREAKSIZE);
             saveEepromFlag = false;
         }
     }

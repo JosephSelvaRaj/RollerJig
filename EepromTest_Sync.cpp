@@ -67,6 +67,7 @@
 #include "HL_sys_common.h"
 
 /* USER CODE BEGIN (1) */
+#include "HL_system.h"
 #include "HL_sys_core.h"
 #include "HL_mibspi.h"
 #include "HL_esm.h"
@@ -78,6 +79,7 @@
 #include "stdio.h"
 #include "math.h"
 #include "stdlib.h"
+#include "HL_sci.h"
 
 /* USER CODE END */
 
@@ -90,14 +92,27 @@
 */
 
 /* USER CODE BEGIN (2) */
+#define UART sciREG1
+
+#define  TSIZE1 10
+uint8  TEXT1[TSIZE1]= {'H','E','R','C','U','L','E','S',' ',' '};
+#define  TSIZE2 18
+uint8  TEXT2[TSIZE2]= {'M','I','C','R','O','C','O','N','T','R','O','L','L','E','R','S',' ',' '};
+#define  TSIZE3 19
+uint8  TEXT3[TSIZE3]= {'T','E','X','A','S',' ','I','N','S','T','R','U','M','E','N','T','S','\n','\r'};
+#define SPACESIZE 1
+uint8  SPACE[SPACESIZE]= {' '};
+#define BREAKSIZE 2
+uint8  BREAK[BREAKSIZE]= {'\n','\r'};
+
 const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x01;
 const int mainCountersTotalByteSize = 16U;
 
 int EepromSaveInterval = 60000;     // Every 60 seconds
 int CouterIncrementInterval = 1000; // Every 1 second
-int mainCounterOne = 0U;
-int mainCounterTwo = 1U;
+uint32_t mainCounterOne = 0U;
+uint32_t mainCounterTwo = 1U;
 volatile bool saveEepromFlag = false;
 volatile bool incrementCounterFlag = false;
 volatile int eepromTimerCounter = 0U;
@@ -119,6 +134,34 @@ void saveCountersToEEPROM(void)
     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
 }
+
+void sciPrintDecimal(sciBASE_t *sci, uint32_t value) {
+    char buffer[11]; // Buffer to hold the string representation of the decimal value
+    int i = 0;
+    snprintf(buffer, 11, "%lu", value); // Convert the uint32 value to a string
+
+    // Print each character of the string until the null terminator
+    for(i = 0; buffer[i] != '\0'; i++)
+    {
+        while ((sci->FLR & 0x4) == 4); // Wait until busy
+        sciSendByte(sci, buffer[i]); // Send out text
+    }
+    i = 0;
+}
+
+void sciDisplayText(sciBASE_t *sci, uint8 *text,uint32 length)
+{
+    while(length--)
+    {
+        while ((UART->FLR & 0x4) == 4); /* wait until busy */
+        sciSendByte(UART,*text++);      /* send out text   */
+    };
+}
+
+void wait(uint32 time)
+{
+    time--;
+}
 /* USER CODE END */
 
 int main(void)
@@ -129,6 +172,9 @@ int main(void)
 
     /* Initialize RTI driver */
     rtiInit();
+
+    sciInit();      /* initialize sci/sci-lin    */
+                        /* even parity , 2 stop bits */
 
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
@@ -143,6 +189,12 @@ int main(void)
     /* Start RTI Counter Block 0 */
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);
 
+
+    sciPrintDecimal(UART, mainCounterOne);
+    sciDisplayText(UART,&BREAK[0],BREAKSIZE);   /* send text code 3 */
+    sciPrintDecimal(UART, mainCounterTwo);
+
+    wait(200);
     /* Run forever */
     while (1)
     {
@@ -182,13 +234,14 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     {
         incrementCounterFlag = true;
         incrementTimerCounter = 0U;
+        gioSetPort(hetPORT1, gioGetPort(hetPORT1) ^ 0x00000001); // Toggle HNET Pin 0 LED
     }
     /**************************************************************/
 
     /***********************60 Seconds timer***********************/
     if (eepromTimerCounter >= EepromSaveInterval)
     {
-        gioSetPort(hetPORT1, gioGetPort(hetPORT1) ^ 0x00000001); // Toggle HNET Pin 0 LED
+
         saveEepromFlag = true;
         eepromTimerCounter = 0U;
     }

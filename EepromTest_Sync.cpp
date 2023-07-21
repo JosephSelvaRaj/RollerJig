@@ -173,8 +173,7 @@ void sciDisplayText(sciBASE_t *sci, uint8 *text, uint32 length)
 {
     while (length--)
     {
-        while ((UART->FLR & 0x4) == 4)
-            ;                       /* wait until busy */
+        while ((UART->FLR & 0x4) == 4);                       /* wait until busy */
         sciSendByte(UART, *text++); /* send out text   */
     };
 }
@@ -200,7 +199,7 @@ int main(void)
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
-    flushEEPROM();
+    //flushEEPROM();
     loadCountersFromEEPROM();
 
     /* Enable RTI Compare 0 interrupt notification */

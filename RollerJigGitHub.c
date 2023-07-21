@@ -1814,6 +1814,15 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     u32SystemTimer_1ms++;
     u32eeprom_timer_1ms++;
     motorTwoTimer++;
+    
+    /************************RPM Calculation************************/
+    volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;
+    volatile int numberOfRotationTwo = encoderTwoCounter / PULSES_PER_ROTATION;
+    rpmOne = TIMER_CYCLES_PER_MINUTE * numberOfRotationOne;
+    rpmTwo = TIMER_CYCLES_PER_MINUTE * numberOfRotationTwo;
+    encoderOneCounter = 0;
+    encoderTwoCounter = 0;
+    /***************************************************************/
     vCheckSwitchStatus();
 }
 

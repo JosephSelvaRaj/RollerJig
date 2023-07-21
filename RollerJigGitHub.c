@@ -1700,6 +1700,15 @@ void main(void)
                 {
                     SetMotorTwoSpeed(70U);
                 }
+                if (motorTwoTimer > 1000 && motorTwoTimer <= 3000)
+                {
+                    //Compare RPM for Error
+                    if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+                    {
+                        // blfag_stop_reset = true; // motor still stuck or no power, no need reset
+                        flag_motor_error = true;
+                    }
+                }
                 else
                 {
                     // startMotorTwoTimerFlag = false;

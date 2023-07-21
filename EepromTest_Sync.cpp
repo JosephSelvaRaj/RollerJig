@@ -139,7 +139,7 @@ void loadCountersFromEEPROM(void)
 
 void saveCountersToEEPROM(void)
 {
-    uint8_t writeBufferArray[16];
+    uint8_t writeBufferArray[16] = {0};
     memcpy(writeBufferArray, &mainCounterOne, 4U);
     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
@@ -147,7 +147,7 @@ void saveCountersToEEPROM(void)
 
 void flushEEPROM(void)
 {
-    uint8_t flushBufferArray[16];
+    uint8_t flushBufferArray[16] = {0};
     memcpy(flushBufferArray, &flush, 4U);
     memcpy(flushBufferArray + 4, &flushTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)flushBufferArray);

@@ -218,7 +218,7 @@ int main(void)
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
-    // flushEEPROM();
+    //flushEEPROM();
     loadCountersFromEEPROM();
 
     /* Enable RTI Compare 0 interrupt notification */
@@ -235,8 +235,8 @@ int main(void)
     sciDisplayText(UART, &TEXT2[0], TSIZE2);    /* send text code 3 */
     sciPrintDecimal(UART, mainCounterTwo);
     sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-
     wait(200);
+
     /* Run forever */
     while (1)
     {
@@ -251,6 +251,7 @@ int main(void)
             sciDisplayText(UART, &TEXT6[0], TSIZE6);    /* send text code 3 */
             sciPrintDecimal(UART, mainCounterTwo);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+            wait(200);
             incrementCounterFlag = false;
         }
 
@@ -264,6 +265,7 @@ int main(void)
             sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
             sciPrintDecimal(UART, mainCounterTwo);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+            wait(200);
             saveEepromFlag = false;
         }
     }

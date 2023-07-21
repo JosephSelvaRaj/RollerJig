@@ -113,7 +113,7 @@
 #define DELAY_1MS_TICKS 27273 // The For loop takes 11 MC, hence 300M/11 = 27272727 MC for 1 sec
 
 const int mainCountersAddress = 0x1;
-const int mainCountersTotalByteSize = 16U;
+const int mainCountersTotalByteSize = 8U;
 
 unsigned int mainCounterOne = 0;
 unsigned int mainCounterTwo = 0;
@@ -198,34 +198,34 @@ void StartMotorsPWM(void)
     pwmStart(hetRAM1, pwm1); // MotorOne PWM
 }
 
-// void EEPROMInit(void)
-// {
-//     TI_Fee_Init();
-//     /*Always wait after async EEPROM read or write till EEPROM is idle (Operation finished)*/
-//     do
-//     {
-//         TI_Fee_MainFunction();
-//         vDelay_ticks(300U);
-//         Status = TI_Fee_GetStatus(0);
-//     } while (Status != IDLE);
-// }
+void EEPROMInit(void)
+{
+    TI_Fee_Init();
+    /*Always wait after async EEPROM read or write till EEPROM is idle (Operation finished)*/
+    do
+    {
+        TI_Fee_MainFunction();
+        vDelay_ticks(300U);
+        Status = TI_Fee_GetStatus(0);
+    } while (Status != IDLE);
+}
 
-// void loadCountersFromEEPROM(void)
-// {
-//     uint8_t loadBufferArray = {0};
-//     // Loads both main counters from same block address
-//     TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, *loadBufferArray, mainCountersTotalByteSize);
-//     memcpy(mainCounterOne, loadBufferArray, 4U);     // Extract first 4 bytes for mainCounterOne
-//     memcpy(mainCounterTwo, loadBufferArray + 4, 4U); // Extract next 4 bytes for mainCounterTwo
-// }
+void loadCountersFromEEPROM(void)
+{
+    uint8_t loadBufferArray[mainCountersTotalByteSize] = {0};
+    // Loads both main counters from same block address
+    TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, *loadBufferArray, mainCountersTotalByteSize);
+    memcpy(mainCounterOne, loadBufferArray, 4U);     // Extract first 4 bytes for mainCounterOne
+    memcpy(mainCounterTwo, loadBufferArray + 4, 4U); // Extract next 4 bytes for mainCounterTwo
+}
 
-// void saveCountersToEEPROM(void)
-// {
-//     uint8_t writeBufferArray = {0};
-//     memcpy(writeBufferArray, &mainCounterOne, 4U);
-//     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
-//     TI_Fee_WriteSync(mainCountersAddress, *writeBufferArray);
-// }
+void saveCountersToEEPROM(void)
+{
+    uint8_t writeBufferArray[mainCountersTotalByteSize] = {0};
+    memcpy(writeBufferArray, &mainCounterOne, 4U);
+    memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
+    TI_Fee_WriteSync(mainCountersAddress, *writeBufferArray);
+}
 
 /*DisplayOne number display function*/
 void DisplayDigit(uint8_t Digit)

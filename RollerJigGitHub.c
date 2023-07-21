@@ -183,6 +183,8 @@ volatile uint32_t u32ErrorHappenTwo_cntr = 0;
 volatile int motorTwoTimer = 0;
 volatile uint8_t stateMotorTwo = 0;
 
+const uint16_t testCounterTwoByteSize = 4U;
+
 volatile uint32_t u32TestCounterTwo_new = 0;
 uint32_t u32move_backwardTwo_waiting_ms = 0;
 boolean firstResetTwo = true;
@@ -1350,19 +1352,23 @@ void vUpdateDisplayError_01(void)
 
 void loadCountersFromEEPROM(void)
 {
-    // uint8_t loadBufferArray = {0};
+    uint8_t loadBufferArray[testCounterTwoByteSize] = {0};
     //  Loads both main counters from same block address
-    TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, 0U, &u32TestCounterTwo_new, 4U);
-    // memcpy(mainCounterOne, loadBufferArray, 4U);  // Extract first 4 bytes for mainCounterOne
-    // memcpy(u32TestCounterTwo_new, loadBufferArray + 4, 4U); // Extract next 4 bytes for u32TestCounterTwo_new
+    TI_Fee_ReadSync(COUNTERTWO_EEPROM_ADD, 0U, (uint8_t *)loadBufferArray, testCounterTwoByteSize);
+    memcpy(&u32TestCounterTwo_new, loadBufferArray, testCounterTwoByteSize); // Extract first 4 bytes for u32TestCounterTwo_new
 }
 
 void saveCountersToEEPROM(void)
 {
-    // uint8_t writeBufferArray = {0};
-    // memcpy(writeBufferArray, &mainCounterOne, 4U);
-    // memcpy(writeBufferArray + 4, &u32TestCounterTwo_new, 4U);
-    TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, &u32TestCounterTwo_new);
+    uint8_t writeBufferArray[testCounterTwoByteSize] = {0};
+    memcpy(writeBufferArray, &u32TestCounterTwo_new, testCounterTwoByteSize);
+    TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, (uint8_t *)writeBufferArray);
+}
+
+void flushCounterTwoEEPROM(void)
+{
+    uint8_t flushBufferArray[testCounterTwoByteSize] = {0};
+    TI_Fee_WriteSync(COUNTERTWO_EEPROM_ADD, (uint8_t *)flushBufferArray);
 }
 
 void SetMotorTwoDirection(uint32 dirB)
@@ -1374,134 +1380,6 @@ void SetMotorTwoSpeed(uint32 spdB)
 {
     pwmSetDuty(hetRAM1, pwm0, spdB);
 }
-
-// void MotorTwo_move_forward_pulse(void)
-// {
-//  static boolean first_run = true;
-//  static boolean wait_start = true;
-//  if (bl_tick_move_forward_timeTwo)
-//  {
-//      nowtime_ms = u32GetTime_ms();
-//      bl_tick_move_forward_timeTwo = false;
-//      encoderTwoCounter = 0U;
-//  }
-//  // move forward
-//  SetMotorTwoDirection(PIN_HIGH); // set pin 3 output as 1//
-//  flag_motorTwo_forward = true;
-//  flag_motorTwo_backward = false;
-//  max_pos_flagTwo = false;
-
-//  uint8_t time_index = 0;
-//  uint32_t u32Temp_ms = 0;
-//  uint32_t u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
-
-//  // now check whether timeout or not
-//  if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
-//  {
-//      flag_motorTwo_error = true;
-//  }
-//  else
-//  {
-//      // ramp up region
-//      if (encoderTwoCounter <= RAMP_UP_PULSE_END)
-//      {
-//          SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX); // set duty cycle to individual //
-//      }
-//      else if (encoderTwoCounter < CONST_SPEED_PULSE_END)
-//      {
-//          SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
-//          // only check motor speed here
-//          if ((encoderTwoCounter > (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 2000ms starts check
-//          {
-//              if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-//              {
-//                  flag_motorTwo_error = true;
-//              }
-//              blflag_speed_check = true; // check no issue
-//          }
-//      }
-//      else if (encoderTwoCounter < RAMP_DOWN_PULSE_END)
-//      {
-//          SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX); // set duty cycle to individual //
-//      }
-//      else
-//      {
-//          // stop motor first
-//          SetMotorTwoSpeed(0); // set duty cycle to 0//
-//          SetMotorTwoSpeed(0); // set duty cycle to 0//
-//          max_pos_flagTwo = true;
-
-//          // updateLED_flag = true;
-//          // motor_forward = false;
-//          blflag_speed_check = false; // prepare for next check
-
-//          u32move_forward_waiting_ms = u32GetTime_ms();
-//      }
-//  }
-// }
-
-// void MotorTwo_move_backward_pulse(void)
-// {
-//  // move backward
-//  SetMotorTwoDirection(BACKWARD);
-//  flag_motorTwo_backward = true;
-//  flag_motorTwo_forward = false;
-//  uint32_t u32Temp_ms = 0;
-//  static uint32_t u32TimePast_ms;
-
-//  if (bl_tick_move_backward_time)
-//  {
-//      nowtime_ms = u32GetTime_ms();
-//      bl_tick_move_backward_time = false;
-//  }
-
-//  u32TimePast_ms = u32GetTimeSliceDuration_ms(nowtime_ms);
-//  // now check whether timeout or not
-//  if (u32TimePast_ms > PULSE_MOVE_TIMEOUT)
-//  {
-//      flag_motorTwo_error = true;
-//  }
-//  else
-//  {
-//      SetMotorTwoSpeed(70U);
-
-//      // // ramp up region
-//      // if (encoderTwoCounter >= CONST_SPEED_PULSE_END)
-//      // {
-//      //  SetMotorTwoSpeed(MOTOR_DUTYCYCLE_RAMP_MAX);
-//      // }
-//      // else if (encoderTwoCounter >= RAMP_UP_PULSE_END)
-//      // {
-//      //  SetMotorTwoSpeed(MOTOR_DUTYCYCLE_CONST_SPEED);
-
-//      //  if ((encoderTwoCounter < (CONST_SPEED_PULSE_END >> 1U)) && !blflag_speed_check) // only after 920pulses starts check
-//      //  {
-//      //      if (u32SpeedAve < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-//      //      {
-//      //          flag_motorTwo_error = true;
-//      //      }
-//      //      blflag_speed_check = true; // check no issue
-//      //  }
-//      // }
-//      // else if (encoderTwoCounter > 3U)
-//      // {
-//      //  SetMotorTwoSpeed(MOTOR_DUTYCYCLE_STOP_MAX);
-//      // }
-//      // else
-//      // {
-//      //  SetMotorTwoSpeed(0U);
-//      //  if (!flag_motorTwo_error)
-//      //  {
-//      //      u32TestCounter_new++;
-//      //  }
-//      //  blflag_speed_check = false; // prepare for next speed check
-
-//      //  max_pos_flagTwo = true;
-
-// //       //  u32move_backwardTwo_waiting_ms = u32GetTime_ms();
-// //       // }
-// //   }
-// }
 
 /********************************************END OF MOTOR TWO FUNCTION DEFINITIONS*********************************************/
 //////**********************End of Initialization***********************/////
@@ -1789,7 +1667,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         // blfag_stop_reset = true; // motor still stuck or no power, no need reset
-                        //flag_motorTwo_error = true;
+                        // flag_motorTwo_error = true;
                     }
                     blflag_speed_check = true;
                 }
@@ -1797,8 +1675,8 @@ void main(void)
             else // both backward and forward done
             {
 
-                SetMotorTwoSpeed(0); // set duty cycle to 0//
-                SetMotorTwoSpeed(0); // set duty cycle to 0//
+                SetMotorTwoSpeed(0);   // set duty cycle to 0//
+                SetMotorTwoSpeed(0);   // set duty cycle to 0//
                 firstResetTwo = false; // go to normal procedure
                 bl_tick_move_forward_time = true;
                 flag_motorTwo_forward = true;
@@ -1813,72 +1691,74 @@ void main(void)
         else
         {
             switch (stateMotorTwo)
-                    {
-                    case 1:
-                        // Motors forward state 3 sec
-                        SetMotorTwoDirection(FORWARD);
-                        //startMotorTwoTimer = true;
-                        if (motorTwoTimer <= 3000)
-                        {
-                            SetMotorTwoSpeed(70U);
-                        }
-                        else
-                        {
-                            //startmotorTwoTimer = false;
-                            motorTwoTimer = 0;
-                            stateMotorTwo = 2;
-                        }
-                        break;
+            {
+            case 1:
+                // Motors forward state 3 sec
+                SetMotorTwoDirection(FORWARD);
+                // startMotorTwoTimerFlag = true;
+                if (motorTwoTimer <= 3000)
+                {
+                    SetMotorTwoSpeed(70U);
+                }
+                else
+                {
+                    // startMotorTwoTimerFlag = false;
+                    motorTwoTimer = 0;
+                    stateMotorTwo = 2;
+                }
+                break;
 
-                    case 2:
-                        // 1 sec pause state
-                        //startMotorTwoTimer = true;
-                        if (motorTwoTimer <= 1000)
-                        {
-                            SetMotorTwoSpeed(0U);
-                        }
-                        else
-                        {
-                            //startMotorTwoTimer = false;
-                            motorTwoTimer = 0;
-                            stateMotorTwo = 3;
-                        }
-                        break;
+            case 2:
+                // 1 sec pause state
+                // startMotorTwoTimerFlag = true;
+                if (motorTwoTimer <= 1000)
+                {
+                    SetMotorTwoSpeed(0U);
+                }
+                else
+                {
+                    // startMotorTwoTimerFlag = false;
+                    motorTwoTimer = 0;
+                    stateMotorTwo = 3;
+                }
+                break;
 
-                    case 3:
-                        // Motors backward state 3.5 sec
-                        SetMotorTwoDirection(BACKWARD);
-                        //startMotorTwoTimer = true;
-                        if (motorTwoTimer <= 3500)
-                        {
-                            SetMotorTwoSpeed(70U);
-                        }
-                        else
-                        {
-                            //startMotorTwoTimer = false;
-                            motorTwoTimer = 0;
-                            stateMotorTwo = 4;
-                        }
-                        break;
+            case 3:
+                // Motors backward state 3.5 sec
+                SetMotorTwoDirection(BACKWARD);
+                // startMotorTwoTimerFlag = true;
+                if (motorTwoTimer <= 3500)
+                {
+                    SetMotorTwoSpeed(70U);
+                }
+                else
+                {
+                    // startMotorTwoTimerFlag = false;
+                    motorTwoTimer = 0;
+                    stateMotorTwo = 4;
+                }
+                break;
 
-                    case 4:
-                        // Motors 5 sec end-of-cycle pause state
-                        //startMotorTwoTimer = true;
-                        if (motorTwoTimer <= 5000)
-                        {
-                            SetMotorTwoSpeed(0U);
-                        }
-                        else
-                        {
-                            //startMotorTwoTimer = false;
-                            motorTwoTimer = 0;
-                            stateMotorTwo = 1;
-                        }
-                        break;
-                    default:
-                        break;
-                    }
+            case 4:
+                // Motors 5 sec end-of-cycle pause state
+                // startMotorTwoTimerFlag = true;
+                if (motorTwoTimer <= 5000)
+                {
+                    SetMotorTwoSpeed(0U);
+                }
+                else
+                {
+                    // startMotorTwoTimerFlag = false;
+                    motorTwoTimer = 0;
+                    stateMotorTwo = 1;
+                }
+                break;
 
+            case 5:
+            // Motor Error state
+            default:
+                break;
+            }
         }
 
         /***************************************************End of Motor Two code***************************************************/

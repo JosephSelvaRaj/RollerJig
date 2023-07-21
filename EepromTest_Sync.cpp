@@ -115,10 +115,11 @@ uint8_t TEXT6[TSIZE6] = {'C', 'o', 'u', 'n', 't', 'e', 'r', 'T', 'w', 'o', ' ', 
 
 const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x01;
-const int mainCountersTotalByteSize = 16U;
+const int mainCountersTotalByteSize = 8U;
 
 int EepromSaveInterval = 60000;     // Every 60 seconds
 int CouterIncrementInterval = 1000; // Every 1 second
+uint16 u16JobResult, Status;
 uint32_t flush = 0;
 uint32_t flushTwo = 1;
 uint32_t mainCounterOne = 0;
@@ -130,7 +131,7 @@ volatile int incrementTimerCounter = 0U;
 
 void loadCountersFromEEPROM(void)
 {
-    uint8_t loadBufferArray[16] = {0};
+    uint8_t loadBufferArray[16];
     // Loads both main counters from same block address
     TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
     memcpy(&mainCounterOne, loadBufferArray, 4U);     // Extract first 4 bytes for mainCounterOne
@@ -139,7 +140,7 @@ void loadCountersFromEEPROM(void)
 
 void saveCountersToEEPROM(void)
 {
-    uint8_t writeBufferArray[16] = {0};
+    uint8_t writeBufferArray[16];
     memcpy(writeBufferArray, &mainCounterOne, 4U);
     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
@@ -147,7 +148,7 @@ void saveCountersToEEPROM(void)
 
 void flushEEPROM(void)
 {
-    uint8_t flushBufferArray[16] = {0};
+    uint8_t flushBufferArray[16];
     memcpy(flushBufferArray, &flush, 4U);
     memcpy(flushBufferArray + 4, &flushTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)flushBufferArray);
@@ -173,7 +174,8 @@ void sciDisplayText(sciBASE_t *sci, uint8 *text, uint32 length)
 {
     while (length--)
     {
-        while ((UART->FLR & 0x4) == 4);                       /* wait until busy */
+        while ((UART->FLR & 0x4) == 4)
+            ;                       /* wait until busy */
         sciSendByte(UART, *text++); /* send out text   */
     };
 }
@@ -182,6 +184,17 @@ void wait(uint32 time)
 {
     time--;
 }
+
+void delay(void)
+{
+    unsigned int dummycnt=0x0000FFU;
+    do
+    {
+        dummycnt--;
+    }
+    while(dummycnt>0);
+}
+
 /* USER CODE END */
 
 int main(void)
@@ -189,6 +202,12 @@ int main(void)
     /* USER CODE BEGIN (3) */
 
     TI_Fee_Init();
+    do
+    {
+        TI_Fee_MainFunction();
+        delay();
+        Status = TI_Fee_GetStatus(0);
+    } while (Status != IDLE);
 
     /* Initialize RTI driver */
     rtiInit();
@@ -199,7 +218,7 @@ int main(void)
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
-    //flushEEPROM();
+    // flushEEPROM();
     loadCountersFromEEPROM();
 
     /* Enable RTI Compare 0 interrupt notification */

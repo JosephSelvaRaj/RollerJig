@@ -131,7 +131,7 @@ volatile int incrementTimerCounter = 0U;
 
 void loadCountersFromEEPROM(void)
 {
-    uint8_t loadBufferArray[16];
+    uint8_t loadBufferArray[8];
     // Loads both main counters from same block address
     TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
     memcpy(&mainCounterOne, loadBufferArray, 4U);     // Extract first 4 bytes for mainCounterOne
@@ -140,7 +140,7 @@ void loadCountersFromEEPROM(void)
 
 void saveCountersToEEPROM(void)
 {
-    uint8_t writeBufferArray[16];
+    uint8_t writeBufferArray[8];
     memcpy(writeBufferArray, &mainCounterOne, 4U);
     memcpy(writeBufferArray + 4, &mainCounterTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
@@ -148,7 +148,7 @@ void saveCountersToEEPROM(void)
 
 void flushEEPROM(void)
 {
-    uint8_t flushBufferArray[16];
+    uint8_t flushBufferArray[8];
     memcpy(flushBufferArray, &flush, 4U);
     memcpy(flushBufferArray + 4, &flushTwo, 4U);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)flushBufferArray);

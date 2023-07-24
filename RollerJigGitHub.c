@@ -1839,11 +1839,11 @@ void main(void)
         case 6:
             /***************************Motor Error State***************************/
             startMotorTwoTimerFlag = true;
-            SetMotorTwoSpeed(70U);
+            SetMotorTwoSpeed(0U);
 
             if (motorTwoTimer <= 60000)
             {
-                SetMotorTwoSpeed(70U);
+                SetMotorTwoSpeed(0U);
             }
             else
             {

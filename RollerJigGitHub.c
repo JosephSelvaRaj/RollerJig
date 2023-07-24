@@ -1711,6 +1711,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         flag_motorTwo_error = true;
+                        stateMotorTwo = 6;
                     }
                 }
             }
@@ -1728,6 +1729,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         flag_motorTwo_error = true;
+                        stateMotorTwo = 6;
                     }
                 }
             }
@@ -1759,6 +1761,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         flag_motorTwo_error = true;
+                        stateMotorTwo = 6;
                     }
                 }
             }
@@ -1805,6 +1808,7 @@ void main(void)
                     if (u32Speed_rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         flag_motorTwo_error = true;
+                        stateMotorTwo = 6;
                     }
                 }
             }
@@ -1837,7 +1841,6 @@ void main(void)
 
             if (motorTwoTimer <= 60000)
             {
-                
             }
             else
             {

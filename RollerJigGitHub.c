@@ -1615,8 +1615,6 @@ void main(void)
         }
         /***************************************************End of Motor One code***************************************************/
 
-        
-
         // motor speed measure
         // if (u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
         // {
@@ -1691,8 +1689,8 @@ void main(void)
         //     }
         // }
         // Else not first reset
-        
-/***************************************************Start of Motor Two code***************************************************/
+
+        /***************************************************Start of Motor Two code***************************************************/
         switch (stateMotorTwo)
         {
         case 1:
@@ -1835,6 +1833,20 @@ void main(void)
 
         case 6:
             /***************************Motor Error State***************************/
+            startMotorTwoTimerFlag = true;
+
+            if (motorTwoTimer <= 60000)
+            {
+                
+            }
+            else
+            {
+                startMotorTwoTimerFlag = false;
+                motorTwoTimer = 0;
+                stateMotorTwo = 1; // Transiton to next state
+            }
+
+            break;
 
         default:
             break;

@@ -1702,7 +1702,7 @@ void main(void)
                 }
                 if (motorTwoTimer > 1000 && motorTwoTimer <= 3000)
                 {
-                    //Compare RPM for Error
+                    // Compare RPM for Error
                     if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                     {
                         // blfag_stop_reset = true; // motor still stuck or no power, no need reset
@@ -1814,7 +1814,16 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     u32SystemTimer_1ms++;
     u32eeprom_timer_1ms++;
     motorTwoTimer++;
-    
+
+    if (startMotorTwoTimerFlag)
+    {
+        motorTwoTimer++;
+    }
+    else if (startMotorTwoTimerFlag == false)
+    {
+        motorTwoTimer = 0;
+    }
+
     /************************RPM Calculation************************/
     volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;
     volatile int numberOfRotationTwo = encoderTwoCounter / PULSES_PER_ROTATION;

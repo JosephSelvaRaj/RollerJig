@@ -535,7 +535,7 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     {
         motorOneTimer++;
     }
-    else
+    else if(startMotorOneTimer == false)
     {
         motorOneTimer = 0;
     }

@@ -1615,7 +1615,7 @@ void main(void)
         }
         /***************************************************End of Motor One code***************************************************/
 
-        /***************************************************Start of Motor Two code***************************************************/
+        
 
         // motor speed measure
         // if (u32GetTimeSliceDuration_ms(u32SpeedTimerTwo_ms) > 100U) // every 100ms calculate the speed
@@ -1691,7 +1691,8 @@ void main(void)
         //     }
         // }
         // Else not first reset
-
+        
+/***************************************************Start of Motor Two code***************************************************/
         switch (stateMotorTwo)
         {
         case 1:

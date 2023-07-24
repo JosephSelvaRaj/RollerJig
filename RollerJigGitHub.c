@@ -170,6 +170,8 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define MOTORTWODIRPIN 7U
 #define MOTORTWOPWMPIN 19U
 
+#define RESTING_MOTOR_SPEED_RPM 0U // min value
+
 volatile uint32_t u32ResetTimerTwo_ms = 0;
 volatile uint32_t u32SystemTimerTwo_1ms = 0;
 volatile uint32_t u32SpeedTimerTwo_ms = 0;
@@ -1723,7 +1725,14 @@ void main(void)
                 if (motorTwoTimer <= 1000)
                 {
                     SetMotorTwoSpeed(0U);
+
+                    // Compare RPM for Error
+                    if (u32Speed_rpmTwo != RESTING_MOTOR_SPEED_RPM)
+                    {
+                        flag_motor_error = true;
+                    }
                 }
+
                 else
                 {
                     // startMotorTwoTimerFlag = false;
@@ -1740,6 +1749,15 @@ void main(void)
                 {
                     SetMotorTwoSpeed(70U);
                 }
+                if (motorTwoTimer > 1000 && motorTwoTimer <= 3500)
+                {
+                    // Compare RPM for Error
+                    if (u32Speed_rpm < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+                    {
+                        // blfag_stop_reset = true; // motor still stuck or no power, no need reset
+                        flag_motor_error = true;
+                    }
+                }
                 else
                 {
                     // startMotorTwoTimerFlag = false;
@@ -1754,6 +1772,12 @@ void main(void)
                 if (motorTwoTimer <= 5000)
                 {
                     SetMotorTwoSpeed(0U);
+
+                    // Compare RPM for Error
+                    if (u32Speed_rpmTwo != RESTING_MOTOR_SPEED_RPM)
+                    {
+                        flag_motor_error = true;
+                    }
                 }
                 else
                 {

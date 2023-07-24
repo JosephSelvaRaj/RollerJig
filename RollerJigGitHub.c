@@ -1769,7 +1769,7 @@ void main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 2; // Transiton to next state
+                stateMotorTwo = 3; // Transiton to next state
             }
 
             break;
@@ -1787,7 +1787,7 @@ void main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 3; // Transiton to next state
+                stateMotorTwo = 4; // Transiton to next state
             }
             break;
 
@@ -1816,7 +1816,8 @@ void main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 4; // Transiton to next state
+                stateMotorTwo = 5; // Transiton to next state
+                u32TestCounterTwo_new++;
             }
             break;
 
@@ -1831,22 +1832,25 @@ void main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 1; // Transiton to next state
+                stateMotorTwo = 2; // Transiton to next state
             }
             break;
 
         case 6:
             /***************************Motor Error State***************************/
             startMotorTwoTimerFlag = true;
+            SetMotorTwoSpeed(70U);
 
             if (motorTwoTimer <= 60000)
             {
+                SetMotorTwoSpeed(70U);
             }
             else
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
                 stateMotorTwo = 1; // Transiton to next state
+                flag_motorTwo_eror = false;
             }
 
             break;
@@ -1875,20 +1879,13 @@ void main(void)
             vUpdateDisplayError_02(); // Else display Error Message on DisplayTwo
         }
 
-        if ((u32GetTimeSliceDuration_ms(u32move_backward_waiting_ms) > MOTOR_COOLING_TIME_MS)) // motor cooling
+
+        if ((u32TestCounter_new % 12U) == 0) // every 12 cycles save once
         {
-            motor_forward = true;
-            blflag_speed_check = false; // prepare for next check
-            max_pos_flag = false;
-            bl_tick_move_forward_time = true;
-            i32EncPulse_cntr = 0;
-            updateLED_flag = true;
-            if ((u32TestCounter_new % 12U) == 0) // every 12 cycles save once
-            {
-                EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
-                vDelay_ticks(800U);
-            }
+            EEPROM_writeCounterData(u32TestCounter_new, u32TestCounter_new, COUNTER_EEPROM_ADD);
+            vDelay_ticks(800U);
         }
+        
     }
 }
 

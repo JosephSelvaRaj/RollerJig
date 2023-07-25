@@ -13,7 +13,6 @@ uint32_t uRotary2LastVal = EQEP2_QPOSINIT_CONFIGVALUE; // no need to set volatil
 uint32_t uRotary2 = EQEP2_QPOSINIT_CONFIGVALUE;        // no need to set volatile, only used in this function
 boolean bWrap;
 unsigned char uRot;
-volatile uint32_t encoderTwoCounter = 0;
 
 void rotaryInit(boolean wrap)
 {

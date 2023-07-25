@@ -171,6 +171,9 @@ uint8_t au8DispStr[51]; //"Motor Pulse Count = %5u, Test Count = %9u\r\n"
 #define MOTORTWOPWMPIN 19U
 
 #define RESTING_MOTOR_SPEED_RPM 0U // min value
+#define RPM_TIMER_CYCLES_PER_MINUTE 600U
+#define MOTOR_TWO_PULSE_PER_ROUND 12U
+#define RPM_CALCULATION_INTERVAL 100U
 
 volatile uint32_t u32ResetTimerTwo_ms = 0;
 volatile uint32_t u32SystemTimerTwo_1ms = 0;
@@ -183,6 +186,7 @@ volatile uint32_t u32TimerTwo_100ms = 0;
 volatile uint8_t u8IndexTwo = 0;
 volatile uint32_t u32ErrorHappenTwo_cntr = 0;
 volatile int motorTwoTimer = 0;
+volatile int rpmTimer = 0;
 volatile uint8_t stateMotorTwo = 1;
 
 const uint16_t testCounterTwoByteSize = 4U;
@@ -1839,7 +1843,6 @@ void main(void)
         case 6:
             /***************************Motor Error State***************************/
             startMotorTwoTimerFlag = true;
-            SetMotorTwoSpeed(0U);
 
             if (motorTwoTimer <= 60000)
             {
@@ -1850,7 +1853,8 @@ void main(void)
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
                 stateMotorTwo = 1; // Transiton to next state
-                flag_motorTwo_eror = false;
+
+                flag_motorTwo_error = false;
             }
 
             break;
@@ -1894,53 +1898,27 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
 {
     u32SystemTimer_1ms++;
     u32eeprom_timer_1ms++;
+    rpmTimer++;
 
     if (startMotorTwoTimerFlag)
     {
         motorTwoTimer++;
     }
-    else if (startMotorTwoTimerFlag == false)
+    else
     {
         motorTwoTimer = 0;
     }
 
-    /************************RPM Calculation************************/
-    volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;
-    volatile int numberOfRotationTwo = encoderTwoCounter / PULSES_PER_ROTATION;
-    rpmOne = TIMER_CYCLES_PER_MINUTE * numberOfRotationOne;
-    rpmTwo = TIMER_CYCLES_PER_MINUTE * numberOfRotationTwo;
-    encoderOneCounter = 0;
-    encoderTwoCounter = 0;
-    /***************************************************************/
+    //100ms Timer
+    if (rpmTimer >= RPM_CALCULATION_INTERVAL)
+    {   
+        /************************RPM Calculation************************/
+        volatile int numberOfRotationsMotorTwo = encoderTwoCounter / MOTOR_TWO_PULSE_PER_ROUND;
+        u32Speed_rpmTwo = RPM_TIMER_CYCLES_PER_MINUTE * numberOfRotationsMotorTwo;
+        encoderTwoCounter = 0;
+        rpmTimer = 0;
+        /***************************************************************/
+    }
+
     vCheckSwitchStatus();
 }
-
-/*for testing*/
-
-/****************Not used only for testing****************/
-/*
-pwmSetDuty(hetRAM1, pwm2, 50U);//set duty cycle and porting to pin NHET00//
-uRotary = getRotaryPosition();//Initialize rotary//
-uRotaryLastVal = uRotary;//Initialize rotary//
-*/
-/****************Not used only for testing****************/
-
-// Var_Disp(rd_data[0]);
-
-// send data through can bus//
-// can_transmit();//can_bus transmit//
-// can_receive();//can_bus receive//
-// can_rx_disp(can_datrx);//display data receive//
-
-// Light_Sens_Disp();//Display Light Sensor Reading//
-// Temp_Sens_Disp();//Display Temperatur Sensor Reading//
-
-// pwmSetDuty(hetRAM1, pwm1, Duty1);
-// CheckRotary();//read encoder//
-// Encod_Disp();//Display Encoder Reading//
-/*********/
-
-/*for testing*/
-// pos=getPWM(1,1);//get position//
-// Pin_Disp(pin_bit);//Display Pin PWM counter//
-/********/

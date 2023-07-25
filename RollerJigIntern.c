@@ -435,6 +435,7 @@ int main(void)
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
 
     // flushEEPROM();
+    loadCountersFromEEPROM();
     //  Start PWM output & motor
     StartMotorsPWM();
 

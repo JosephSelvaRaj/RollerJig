@@ -87,16 +87,14 @@
 #define MOTORSWITCH 0U
 #define MOTORSWITCHPORT gioPORTA
 
-// DisplayOne Pinout
+// Display Pinout
 #define CLOCK_PIN 0U
 #define LATCH_PIN 1U
 #define DATA_PIN 2U
-#define LED_PORT gioPORTB
-
-// DisplayTwo Pinout
 #define CLOCK2_PIN 3U
 #define LATCH2_PIN 4U
 #define DATA2_PIN 5U
+#define LED_PORT gioPORTB
 
 #define E_SIGN_IND 14U
 #define DIG_OFF_IND 16U
@@ -112,6 +110,7 @@
 #define TIMER_CYCLES_PER_MINUTE 60U // 60*100ms = 1min
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
+#
 
 #define DELAY_1MS_TICKS 27273 // The For loop takes 11 MC, hence 300M/11 = 27272727 MC for 1 sec
 
@@ -119,7 +118,6 @@ const int mainCounterAddressOffset = 0U;
 const int mainCountersAddress = 0x1;
 const int mainCounterByteSize = 4U;
 const int mainCountersTotalByteSize = 8U;
-
 
 unsigned int mainCounterOne = 0;
 unsigned int mainCounterTwo = 0;
@@ -224,7 +222,7 @@ void loadCountersFromEEPROM(void)
     uint8_t loadBufferArray[mainCountersTotalByteSize] = {0};
     // Loads both main counters from same block address
     TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, *loadBufferArray, mainCountersTotalByteSize);
-    memcpy(mainCounterOne, loadBufferArray, mainCounterByteSize);     // Extract first 4 bytes for mainCounterOne
+    memcpy(mainCounterOne, loadBufferArray, mainCounterByteSize);                       // Extract first 4 bytes for mainCounterOne
     memcpy(mainCounterTwo, loadBufferArray + mainCounterByteSize, mainCounterByteSize); // Extract next 4 bytes for mainCounterTwo
 }
 
@@ -235,7 +233,6 @@ void saveCountersToEEPROM(void)
     memcpy(writeBufferArray + mainCounterByteSize, &mainCounterTwo, mainCounterByteSize);
     TI_Fee_WriteSync(mainCountersAddress, *writeBufferArray);
 }
-
 
 void flushEEPROM(void)
 {
@@ -323,6 +320,7 @@ void printCounterDisplayOne(uint32_t u32Num)
             }
         }
 #endif
+
         gioSetBit(LED_PORT, LATCH_PIN, LOW);
         DisplayDigit(digits_CommAnode[au8Digit]);
         DisplayDigit(Segment_CommAnode[index]);
@@ -336,7 +334,7 @@ void printCounterDisplayOne(uint32_t u32Num)
 /*DisplayTwo number printing function*/
 void printCounterDisplayTwo(uint32_t u32Num)
 {
-    uint8_t au8String[4];
+    uint8_t au8String[8];
     uint8_t au8Digit;
     uint8_t index = 0;
     bool firstzero = true;
@@ -344,12 +342,12 @@ void printCounterDisplayTwo(uint32_t u32Num)
     {
         u32Num = 99999999UL; // max number can be displayed
     }
-    sprintf(au8String, "%04u", u32Num);
+    sprintf(au8String, "%08lu", u32Num);
 
-    for (index = 0; index < 4; index++)
+    for (index = 0; index < 8; index++)
     {
 
-        au8SpeedData[2 + index] = (uint8_t)(au8String[index] - '0');
+        au8Digit = (uint8_t)(au8String[index] - '0');
 #if 1
         if (firstzero)
         {
@@ -363,15 +361,12 @@ void printCounterDisplayTwo(uint32_t u32Num)
             }
         }
 #endif
-    } // complete the data array
 
-    for (index = 0; index < 8; index++)
-    {
         gioSetBit(LED_PORT, LATCH2_PIN, LOW);
-        DisplayDigit_02(digits_CommAnode[au8SpeedData[index]]);
-        DisplayDigit_02(Segment_CommAnode[index]);
+        DisplayDigit(digits_CommAnode[au8Digit]);
+        DisplayDigit(Segment_CommAnode[index]);
         gioSetBit(LED_PORT, LATCH2_PIN, HIGH);
-        // vDelay_ticks(3000U);
+
         vDelay_ticks(100);
     }
     firstzero = true;
@@ -407,7 +402,6 @@ void displayErrorMotorTwo(void)
     }
 }
 
-
 /* USER CODE END */
 
 int main(void)
@@ -423,9 +417,8 @@ int main(void)
     rtiEnableNotification(rtiREG1, rtiNOTIFICATION_COMPARE0); // Enable timer interrupt
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
 
-
-    //flushEEPROM();
-    // Start PWM output & motor
+    // flushEEPROM();
+    //  Start PWM output & motor
     StartMotorsPWM();
 
     while (1)

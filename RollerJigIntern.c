@@ -490,7 +490,7 @@ int main(void)
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
                 SetMotorOneSpeed(STOP);
-                stateMotorOne = 2; // Transiton to next state
+                stateMotorOne = 2; // Transition to next state
             }
             break;
 
@@ -520,7 +520,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 3; // Transiton to next state
+                stateMotorOne = 3; // Transition to next state
             }
 
             break;
@@ -538,7 +538,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 4; // Transiton to next state
+                stateMotorOne = 4; // Transition to next state
             }
             break;
 
@@ -567,7 +567,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 5; // Transiton to next state
+                stateMotorOne = 5; // Transition to next state
                 mainCounterOne++;
             }
             break;
@@ -583,7 +583,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 2; // Transiton to next state
+                stateMotorOne = 2; // Transition to next state
             }
             break;
 
@@ -600,7 +600,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 1; // Transiton to next state
+                stateMotorOne = 1; // Transition to next state
 
                 motorOneErrorFlag = false;
             }
@@ -660,7 +660,7 @@ int main(void)
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
                 SetMotorTwoSpeed(STOP);
-                stateMotorTwo = 2; // Transiton to next state
+                stateMotorTwo = 2; // Transition to next state
             }
             break;
 
@@ -690,7 +690,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 3; // Transiton to next state
+                stateMotorTwo = 3; // Transition to next state
             }
 
             break;
@@ -708,7 +708,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 4; // Transiton to next state
+                stateMotorTwo = 4; // Transition to next state
             }
             break;
 
@@ -737,7 +737,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 5; // Transiton to next state
+                stateMotorTwo = 5; // Transition to next state
                 mainCounterTwo++;
             }
             break;
@@ -753,7 +753,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 2; // Transiton to next state
+                stateMotorTwo = 2; // Transition to next state
             }
             break;
 
@@ -770,7 +770,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 1; // Transiton to next state
+                stateMotorTwo = 1; // Transition to next state
 
                 motorTwoErrorFlag = false;
             }

@@ -595,10 +595,12 @@ void vUpdateDisplay8Digit_02(uint32_t u32Num)
     }
     sprintf(au8String, "%04u", u32Num);
     // gioSetBit(LED_PORT, LATCH_PIN, PIN_LOW);
-    for (index = 0; index < 4; index++)
+    for (index = 0; index < 8; index++)
     {
 
-        au8SpeedData[2 + index] = (uint8_t)(au8String[index] - '0');
+        //au8SpeedData[2 + index] = (uint8_t)(au8String[index] - '0');
+        au8Digit = (uint8_t)(au8String[index] - '0');
+
 #if 1
         if (firstzero)
         {

@@ -41,17 +41,13 @@ void EEPROM_readData(unsigned int address)
 
 }
 
-void EEPROM_readCounterData(unsigned int address,uint32_t *pTestCounter, uint32_t *pMotorPos)
+void EEPROM_readCounterData(unsigned int address,uint32_t *pCounterOne, uint32_t *pCounterTwo)
 {
-
   uint16_t Status;
 
-  TI_Fee_ReadSync(address, 0, (uint8_t*)au8Read_buff, 16U);
-  //TI_Fee_ReadSync(u16EeBlockAdr, 0, pu8DataBuff, u16BlockSize);
-  //EEPROM_readValue(au8Read_buff, 16U, address);
-  memcpy(pTestCounter,au8Read_buff, 4U);
-  memcpy(pMotorPos,  au8Read_buff+4, 4U);
-
+  TI_Fee_ReadSync(address, 0, (uint8_t*)au8Read_buff, 8U);
+  memcpy(pCounterOne,au8Read_buff, 4U);
+  memcpy(pCounterTwo,  au8Read_buff+4, 4U);
 }
 
 void EEPROM_writeValue(uint8_t* buffer_i, uint8_t block_number)
@@ -88,7 +84,6 @@ void EEPROM_writeCounterData(uint32_t u32data1, uint32_t u32data2, unsigned int 
 	memcpy(au8Write_buff, &u32data1, 4U);
 	memcpy(au8Write_buff+4, &u32data2, 4U);
 	TI_Fee_WriteSync(address, (uint8_t*)au8Write_buff);
-	//EEPROM_writeValue((uint8_t*)au8Write_buff,address);
 	delay(100);
 }
 

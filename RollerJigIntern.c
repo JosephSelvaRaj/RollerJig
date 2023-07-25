@@ -2,7 +2,7 @@
  *   @brief Application main file
  *   @date 30-06-2023
  *   @version 1.0
- *   Author: Joseph
+ *   Author: SIT Internship Team
  *
  *   This file contains an empty main function,
  *   which can be used for the application.
@@ -42,14 +42,19 @@
  *
  */
 
-/**************************************************NOTES***************************************************************
- * Minimum motor PWM: 40%
- * Variables to save to EERPOM: mainCounterOne, mainCounterTwo (4 bytes each)
- *
- *
- *********************************************************************************************************************/
+
 
 /* USER CODE BEGIN (0) */
+/**************************************************NOTES***************************************************************
+ * Minimum motor PWM to run: 40%
+ * Variables saved to EERPOM: mainCounterOne, mainCounterTwo (4 bytes each)
+ *
+ *
+ * Outstanding things to do:
+ * 1. Implement Pause switch
+ * 2. Test 7-segment display code
+ * 
+ *********************************************************************************************************************/
 // Include Files
 #include "HL_het.h"
 #include "HL_sys_common.h"
@@ -59,6 +64,10 @@
 #include "HL_system.h"
 #include "HL_rti.h"
 #include "ti_fee.h"
+#include "string.h"
+#include "stdio.h"
+#include "math.h"
+#include "stdlib.h"
 /* USER CODE END */
 
 /* Include Files */
@@ -87,17 +96,14 @@
 #define MOTORSWITCH 0U
 #define MOTORSWITCHPORT gioPORTA
 
-// DisplayOne Pinout
+// Display Pinout & variables
 #define CLOCK_PIN 0U
 #define LATCH_PIN 1U
 #define DATA_PIN 2U
-#define LED_PORT gioPORTB
-
-// DisplayTwo Pinout
 #define CLOCK2_PIN 3U
 #define LATCH2_PIN 4U
 #define DATA2_PIN 5U
-
+#define LED_PORT gioPORTB
 #define E_SIGN_IND 14U
 #define DIG_OFF_IND 16U
 #define DASH_SIGN_IND 17U
@@ -108,18 +114,28 @@
 #define FORWARD 1U
 #define SLOW 40U
 #define FAST 70U
+#define FIRST_RESET_SPEED 90U
+#define NORMAL_SPEED 70U
+#define FIRST_RESET_RUNTIME 10000U       // 10 secs
+#define FORWARD_PHASE_RUNTIME 3000U      // 3 secs
+#define BACKWARD_PHASE_RUNTIME 3500U     // 3.5 secs
+#define NORMAL_PHASE_PAUSETIME 1000U     // 1 sec
+#define ERROR_CHECK_TIME 1000U           // 1 sec
+#define END_CYCLE_PAUSETIME 5000U        // 5 secs
+#define ERROR_COOLDOWN_TIME 60000U       // 60 secs
+
+// Motor RPM variables
 #define PULSES_PER_ROTATION 12U
 #define TIMER_CYCLES_PER_MINUTE 60U // 60*100ms = 1min
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 
-#define DELAY_1MS_TICKS 27273 // The For loop takes 11 MC, hence 300M/11 = 27272727 MC for 1 sec
-
+//EEPROM variables
+#define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U
+const int mainCountersAddress = 0x1U;
 const int mainCounterAddressOffset = 0U;
-const int mainCountersAddress = 0x1;
 const int mainCounterByteSize = 4U;
-const int mainCountersTotalByteSize = 8U;
-
+const int mainCountersTotalByteSize = MAIN_COUNTERS_TOTAL_BYTE_SIZE;
 
 unsigned int mainCounterOne = 0;
 unsigned int mainCounterTwo = 0;
@@ -221,25 +237,24 @@ void EEPROMInit(void)
 
 void loadCountersFromEEPROM(void)
 {
-    uint8_t loadBufferArray[mainCountersTotalByteSize] = {0};
+    uint8_t loadBufferArray[MAIN_COUNTERS_TOTAL_BYTE_SIZE] = {0};
     // Loads both main counters from same block address
-    TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, *loadBufferArray, mainCountersTotalByteSize);
-    memcpy(mainCounterOne, loadBufferArray, mainCounterByteSize);     // Extract first 4 bytes for mainCounterOne
-    memcpy(mainCounterTwo, loadBufferArray + mainCounterByteSize, mainCounterByteSize); // Extract next 4 bytes for mainCounterTwo
+    TI_Fee_ReadSync(mainCountersAddress, mainCounterAddressOffset, (uint8_t *)loadBufferArray, mainCountersTotalByteSize);
+    memcpy(&mainCounterOne, loadBufferArray, mainCounterByteSize);                       // Extract first 4 bytes for mainCounterOne
+    memcpy(&mainCounterTwo, loadBufferArray + mainCounterByteSize, mainCounterByteSize); // Extract next 4 bytes for mainCounterTwo
 }
 
 void saveCountersToEEPROM(void)
 {
-    uint8_t writeBufferArray[mainCountersTotalByteSize] = {0};
+    uint8_t writeBufferArray[MAIN_COUNTERS_TOTAL_BYTE_SIZE] = {0};
     memcpy(writeBufferArray, &mainCounterOne, mainCounterByteSize);
     memcpy(writeBufferArray + mainCounterByteSize, &mainCounterTwo, mainCounterByteSize);
-    TI_Fee_WriteSync(mainCountersAddress, *writeBufferArray);
+    TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)writeBufferArray);
 }
-
 
 void flushEEPROM(void)
 {
-    uint8_t flushBufferArray[mainCountersTotalByteSize] = {0};
+    uint8_t flushBufferArray[MAIN_COUNTERS_TOTAL_BYTE_SIZE] = {0};
     memcpy(flushBufferArray, &eepromFlush, mainCounterByteSize);
     memcpy(flushBufferArray + mainCounterByteSize, &eepromFlush, mainCounterByteSize);
     TI_Fee_WriteSync(mainCountersAddress, (uint8_t *)flushBufferArray);
@@ -323,6 +338,7 @@ void printCounterDisplayOne(uint32_t u32Num)
             }
         }
 #endif
+
         gioSetBit(LED_PORT, LATCH_PIN, LOW);
         DisplayDigit(digits_CommAnode[au8Digit]);
         DisplayDigit(Segment_CommAnode[index]);
@@ -336,7 +352,7 @@ void printCounterDisplayOne(uint32_t u32Num)
 /*DisplayTwo number printing function*/
 void printCounterDisplayTwo(uint32_t u32Num)
 {
-    uint8_t au8String[4];
+    uint8_t au8String[8];
     uint8_t au8Digit;
     uint8_t index = 0;
     bool firstzero = true;
@@ -344,12 +360,12 @@ void printCounterDisplayTwo(uint32_t u32Num)
     {
         u32Num = 99999999UL; // max number can be displayed
     }
-    sprintf(au8String, "%04u", u32Num);
+    sprintf(au8String, "%08lu", u32Num);
 
-    for (index = 0; index < 4; index++)
+    for (index = 0; index < 8; index++)
     {
 
-        au8SpeedData[2 + index] = (uint8_t)(au8String[index] - '0');
+        au8Digit = (uint8_t)(au8String[index] - '0');
 #if 1
         if (firstzero)
         {
@@ -363,15 +379,12 @@ void printCounterDisplayTwo(uint32_t u32Num)
             }
         }
 #endif
-    } // complete the data array
 
-    for (index = 0; index < 8; index++)
-    {
         gioSetBit(LED_PORT, LATCH2_PIN, LOW);
-        DisplayDigit_02(digits_CommAnode[au8SpeedData[index]]);
-        DisplayDigit_02(Segment_CommAnode[index]);
+        DisplayDigit(digits_CommAnode[au8Digit]);
+        DisplayDigit(Segment_CommAnode[index]);
         gioSetBit(LED_PORT, LATCH2_PIN, HIGH);
-        // vDelay_ticks(3000U);
+
         vDelay_ticks(100);
     }
     firstzero = true;
@@ -407,7 +420,6 @@ void displayErrorMotorTwo(void)
     }
 }
 
-
 /* USER CODE END */
 
 int main(void)
@@ -423,9 +435,8 @@ int main(void)
     rtiEnableNotification(rtiREG1, rtiNOTIFICATION_COMPARE0); // Enable timer interrupt
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
 
-
-    //flushEEPROM();
-    // Start PWM output & motor
+    // flushEEPROM();
+    //  Start PWM output & motor
     StartMotorsPWM();
 
     while (1)
@@ -438,13 +449,13 @@ int main(void)
             startMotorOneTimerFlag = true;
 
             /*********Run motor forward for 10 secs*********/
-            if (motorOneTimer <= 10000)
+            if (motorOneTimer <= FIRST_RESET_RUNTIME)
             {
                 SetMotorOneDirection(FORWARD);
-                SetMotorOneSpeed(90U);
+                SetMotorOneSpeed(FIRST_RESET_SPEED);
 
                 /*********Start error checking 1 sec later*********/
-                if (motorOneTimer > 1000)
+                if (motorOneTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -456,13 +467,13 @@ int main(void)
             }
 
             /*********Run motor backward for 10 secs*********/
-            else if (motorOneTimer > 10000 && motorOneTimer <= 20000)
+            else if (motorOneTimer > FIRST_RESET_RUNTIME && motorOneTimer <= (FIRST_RESET_RUNTIME + FIRST_RESET_RUNTIME))
             {
-                SetMotorOneDirectionirection(BACKWARD);
-                SetMotorOneSpeed(90U);
+                SetMotorOneDirection(BACKWARD);
+                SetMotorOneSpeed(FIRST_RESET_SPEED);
 
                 /*********Start error checking 1 sec later*********/
-                if (motorOneTimer > 11000)
+                if (motorOneTimer > (FIRST_RESET_RUNTIME + ERROR_CHECK_TIME))
                 {
                     // Compare RPM for Error
                     if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -478,8 +489,8 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                SetMotorOneSpeed(0U);
-                stateMotorOne = 2; // Transiton to next state
+                SetMotorOneSpeed(STOP);
+                stateMotorOne = 2; // Transition to next state
             }
             break;
 
@@ -489,13 +500,13 @@ int main(void)
             startMotorOneTimerFlag = true;
 
             /*********Run motor forward for 3 secs*********/
-            if (motorOneTimer <= 3000)
+            if (motorOneTimer <= FORWARD_PHASE_RUNTIME)
             {
-                SetMotorOneDirectionirection(FORWARD);
-                SetMotorOneSpeed(70U);
+                SetMotorOneDirection(FORWARD);
+                SetMotorOneSpeed(NORMAL_SPEED);
                 printCounterDisplayOne(mainCounterOne);
                 /*********Start error checking 1 sec later*********/
-                if (motorOneTimer > 1000)
+                if (motorOneTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -509,7 +520,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 3; // Transiton to next state
+                stateMotorOne = 3; // Transition to next state
             }
 
             break;
@@ -519,15 +530,15 @@ int main(void)
 
             startMotorOneTimerFlag = true;
 
-            if (motorOneTimer <= 1000)
+            if (motorOneTimer <= NORMAL_PHASE_PAUSETIME)
             {
-                SetMotorOneSpeed(0U);
+                SetMotorOneSpeed(STOP);
             }
             else
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 4; // Transiton to next state
+                stateMotorOne = 4; // Transition to next state
             }
             break;
 
@@ -537,12 +548,12 @@ int main(void)
             startMotorOneTimerFlag = true;
 
             /*********Run motor backward for 3.5 secs*********/
-            if (motorOneTimer <= 3500)
+            if (motorOneTimer <= BACKWARD_PHASE_RUNTIME)
             {
-                SetMotorOneDirectionirection(BACKWARD);
-                SetMotorOneSpeed(70U);
+                SetMotorOneDirection(BACKWARD);
+                SetMotorOneSpeed(NORMAL_SPEED);
                 /*********Start error checking 1 sec later*********/
-                if (motorOneTimer > 1000)
+                if (motorOneTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -556,7 +567,7 @@ int main(void)
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 5; // Transiton to next state
+                stateMotorOne = 5; // Transition to next state
                 mainCounterOne++;
             }
             break;
@@ -564,15 +575,15 @@ int main(void)
         case 5:
             /*************************Motor 5 sec Pause State*************************/
             startMotorOneTimerFlag = true;
-            if (motorOneTimer <= 5000)
+            if (motorOneTimer <= END_CYCLE_PAUSETIME)
             {
-                SetMotorOneSpeed(0U);
+                SetMotorOneSpeed(STOP);
             }
             else
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 2; // Transiton to next state
+                stateMotorOne = 2; // Transition to next state
             }
             break;
 
@@ -580,16 +591,16 @@ int main(void)
             /***************************Motor Error State***************************/
             startMotorOneTimerFlag = true;
 
-            if (motorOneTimer <= 60000)
+            if (motorOneTimer <= ERROR_COOLDOWN_TIME)
             {
-                SetMotorOneSpeed(0U);
+                SetMotorOneSpeed(STOP);
                 displayErrorMotorOne();
             }
             else
             {
                 startMotorOneTimerFlag = false;
                 motorOneTimer = 0;
-                stateMotorOne = 1; // Transiton to next state
+                stateMotorOne = 1; // Transition to next state
 
                 motorOneErrorFlag = false;
             }
@@ -608,13 +619,13 @@ int main(void)
             startMotorTwoTimerFlag = true;
 
             /*********Run motor forward for 10 secs*********/
-            if (motorTwoTimer <= 10000)
+            if (motorTwoTimer <= FIRST_RESET_RUNTIME)
             {
                 SetMotorTwoDirection(FORWARD);
-                SetMotorTwoSpeed(90U);
+                SetMotorTwoSpeed(FIRST_RESET_SPEED);
 
                 /*********Start error checking 1 sec later*********/
-                if (motorTwoTimer > 1000)
+                if (motorTwoTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -626,13 +637,13 @@ int main(void)
             }
 
             /*********Run motor backward for 10 secs*********/
-            else if (motorTwoTimer > 10000 && motorTwoTimer <= 20000)
+            else if (motorTwoTimer > FIRST_RESET_RUNTIME && motorTwoTimer <= (FIRST_RESET_RUNTIME + FIRST_RESET_RUNTIME))
             {
                 SetMotorTwoDirection(BACKWARD);
-                SetMotorTwoSpeed(90U);
+                SetMotorTwoSpeed(FIRST_RESET_SPEED);
 
                 /*********Start error checking 1 sec later*********/
-                if (motorTwoTimer > 11000)
+                if (motorTwoTimer > (FIRST_RESET_RUNTIME + ERROR_CHECK_TIME))
                 {
                     // Compare RPM for Error
                     if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -648,8 +659,8 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                SetMotorTwoSpeed(0U);
-                stateMotorTwo = 2; // Transiton to next state
+                SetMotorTwoSpeed(STOP);
+                stateMotorTwo = 2; // Transition to next state
             }
             break;
 
@@ -659,13 +670,13 @@ int main(void)
             startMotorTwoTimerFlag = true;
 
             /*********Run motor forward for 3 secs*********/
-            if (motorTwoTimer <= 3000)
+            if (motorTwoTimer <= FORWARD_PHASE_RUNTIME)
             {
                 SetMotorTwoDirection(FORWARD);
-                SetMotorTwoSpeed(70U);
+                SetMotorTwoSpeed(NORMAL_SPEED);
                 printCounterDisplayTwo(mainCounterTwo);
                 /*********Start error checking 1 sec later*********/
-                if (motorTwoTimer > 1000)
+                if (motorTwoTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -679,7 +690,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 3; // Transiton to next state
+                stateMotorTwo = 3; // Transition to next state
             }
 
             break;
@@ -689,15 +700,15 @@ int main(void)
 
             startMotorTwoTimerFlag = true;
 
-            if (motorTwoTimer <= 1000)
+            if (motorTwoTimer <= NORMAL_PHASE_PAUSETIME)
             {
-                SetMotorTwoSpeed(0U);
+                SetMotorTwoSpeed(STOP);
             }
             else
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 4; // Transiton to next state
+                stateMotorTwo = 4; // Transition to next state
             }
             break;
 
@@ -707,12 +718,12 @@ int main(void)
             startMotorTwoTimerFlag = true;
 
             /*********Run motor backward for 3.5 secs*********/
-            if (motorTwoTimer <= 3500)
+            if (motorTwoTimer <= BACKWARD_PHASE_RUNTIME)
             {
                 SetMotorTwoDirection(BACKWARD);
-                SetMotorTwoSpeed(70U);
+                SetMotorTwoSpeed(NORMAL_SPEED);
                 /*********Start error checking 1 sec later*********/
-                if (motorTwoTimer > 1000)
+                if (motorTwoTimer > ERROR_CHECK_TIME)
                 {
                     // Compare RPM for Error
                     if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
@@ -726,7 +737,7 @@ int main(void)
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 5; // Transiton to next state
+                stateMotorTwo = 5; // Transition to next state
                 mainCounterTwo++;
             }
             break;
@@ -734,15 +745,15 @@ int main(void)
         case 5:
             /*************************Motor 5 sec Pause State*************************/
             startMotorTwoTimerFlag = true;
-            if (motorTwoTimer <= 5000)
+            if (motorTwoTimer <= END_CYCLE_PAUSETIME)
             {
-                SetMotorTwoSpeed(0U);
+                SetMotorTwoSpeed(STOP);
             }
             else
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 2; // Transiton to next state
+                stateMotorTwo = 2; // Transition to next state
             }
             break;
 
@@ -750,16 +761,16 @@ int main(void)
             /***************************Motor Error State***************************/
             startMotorTwoTimerFlag = true;
 
-            if (motorTwoTimer <= 60000)
+            if (motorTwoTimer <= ERROR_COOLDOWN_TIME)
             {
-                SetMotorTwoSpeed(0U);
+                SetMotorTwoSpeed(STOP);
                 displayErrorMotorTwo();
             }
             else
             {
                 startMotorTwoTimerFlag = false;
                 motorTwoTimer = 0;
-                stateMotorTwo = 1; // Transiton to next state
+                stateMotorTwo = 1; // Transition to next state
 
                 motorTwoErrorFlag = false;
             }

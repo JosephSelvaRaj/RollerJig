@@ -116,13 +116,13 @@
 #define FAST 70U
 #define FIRST_RESET_SPEED 90U
 #define NORMAL_SPEED 70U
-#define FIRST_RESET_RUNTIME 10000U       // 10 secs
-#define FORWARD_PHASE_RUNTIME 3000U      // 3 secs
-#define BACKWARD_PHASE_RUNTIME 3500U     // 3.5 secs
-#define NORMAL_PHASE_PAUSETIME 1000U     // 1 sec
-#define ERROR_CHECK_TIME 1000U           // 1 sec
-#define END_CYCLE_PAUSETIME 5000U        // 5 secs
-#define ERROR_COOLDOWN_TIME 60000U       // 60 secs
+#define FIRST_RESET_RUNTIME 100U       // 10 secs
+#define FORWARD_PHASE_RUNTIME 30U      // 3 secs
+#define BACKWARD_PHASE_RUNTIME 35U     // 3.5 secs
+#define NORMAL_PHASE_PAUSETIME 10U     // 1 sec
+#define ERROR_CHECK_TIME 10U           // 1 sec
+#define END_CYCLE_PAUSETIME 50U        // 5 secs
+#define ERROR_COOLDOWN_TIME 600U       // 60 secs
 
 // Motor RPM variables
 #define PULSES_PER_ROTATION 12U
@@ -150,7 +150,6 @@ volatile int motorTwoTimer = 0;
 uint16 u16JobResult, Status;
 volatile long encoderOneCounter = 0U;
 volatile long encoderTwoCounter = 0U;
-volatile int timerCounter = 0U;
 volatile int twoSecondTimerLimit = 20U; // Number of 100ms cycles
 volatile int rpmOne = 0U;
 volatile int rpmTwo = 0U;
@@ -812,7 +811,6 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
 {
     // Increments every 100ms
-    timerCounter++;
 
     /************************RPM Calculation************************/
     volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;

@@ -1039,6 +1039,7 @@ void Init_all()
     gioSetBit(LED_PORT, LATCH2_PIN, 0U);
     TI_Fee_Init();                      // Initialize FEE. This will create Virtual sectors, initialize global variables etc.//
     gioEnableNotification(gioPORTA, 1); // Enable notifications of GIO//
+    gioEnableNotification(gioPORTA, 5); // Enable notifications of GIO//
 
     canInit();                           // configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive //
     canEnableErrorNotification(canREG1); // enabling error interrupts CAN_Bus1//

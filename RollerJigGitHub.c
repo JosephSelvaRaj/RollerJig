@@ -1422,7 +1422,7 @@ void main(void)
     u32SpeedAve = 0;
     u32Timer_100ms = 0;
     u32eeprom_timer_1ms = 0;
-    EEPROM_readCounterData(COUNTER_EEPROM_ADD, &u32TestCounter_new, &u32temp_ee_test);
+    EEPROM_readCounterData(COUNTER_EEPROM_ADD, &u32TestCounter_new, &u32TestCounterTwo_new);
     vDelay_ticks(80000U);
 
     switch_on_cntr = 0;

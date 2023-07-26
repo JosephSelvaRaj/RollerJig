@@ -419,6 +419,44 @@ void displayErrorMotorTwo(void)
     }
 }
 
+void vCheckSwitchStatus(void)
+{
+    if (flag_switch_on)
+    {
+        if (0U == gioGetBit(SWITCH_PORT, SWITCH_PIN))
+        {
+            switch_off_cntr++;
+        }
+        else
+        {
+            if (switch_off_cntr > 0)
+                switch_off_cntr--;
+        }
+        if (switch_off_cntr > SWITCH_DEBOUNCE_COUNTER)
+        {
+            flag_switch_on = false;
+            switch_off_cntr = 0U;
+        }
+    }
+    else
+    {
+        if (1U == gioGetBit(SWITCH_PORT, SWITCH_PIN))
+        {
+            switch_on_cntr++;
+        }
+        else
+        {
+            if (switch_on_cntr > 0)
+                switch_on_cntr--;
+        }
+        if (switch_on_cntr > SWITCH_DEBOUNCE_COUNTER)
+        {
+            flag_switch_on = true;
+            switch_on_cntr = 0U;
+        }
+    }
+}
+
 /* USER CODE END */
 
 int main(void)
@@ -839,6 +877,7 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     {
         motorTwoTimer = 0;
     }
+    vCheckSwitchStatus();
 }
 
 void esmGroupNotification(int bit)

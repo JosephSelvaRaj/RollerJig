@@ -121,7 +121,7 @@
 #define BACKWARD_PHASE_RUNTIME 35U     // 3.5 secs
 #define NORMAL_PHASE_PAUSETIME 10U     // 1 sec
 #define ERROR_CHECK_TIME 10U           // 1 sec
-#define END_CYCLE_PAUSETIME 50U        // 5 secs
+#define END_CYCLE_PAUSETIME 80U        // 8 secs
 #define ERROR_COOLDOWN_TIME 600U       // 60 secs
 
 // Motor RPM variables
@@ -733,6 +733,21 @@ int main(void)
                 switch (stateMotorTwo)
                 {
                 case 1:
+                    /*************************Motor 5 sec Pause State*************************/
+                    startMotorTwoTimerFlag = true;
+                    if (motorTwoTimer <= END_CYCLE_PAUSETIME)
+                    {
+                        SetMotorTwoSpeed(STOP);
+                    }
+                    else
+                    {
+                        startMotorTwoTimerFlag = false;
+                        motorTwoTimer = 0;
+                        stateMotorTwo = 2; // Transition to next state
+                    }
+                    break;
+
+                case 2:
                     /***************************Motor Forward State***************************/
 
                     startMotorTwoTimerFlag = true;
@@ -758,12 +773,12 @@ int main(void)
                     {
                         startMotorTwoTimerFlag = false;
                         motorTwoTimer = 0;
-                        stateMotorTwo = 2; // Transition to next state
+                        stateMotorTwo = 3; // Transition to next state
                     }
 
                     break;
 
-                case 2:
+                case 3:
                     /*************************Motor 1 sec Pause State*************************/
 
                     startMotorTwoTimerFlag = true;
@@ -776,11 +791,11 @@ int main(void)
                     {
                         startMotorTwoTimerFlag = false;
                         motorTwoTimer = 0;
-                        stateMotorTwo = 3; // Transition to next state
+                        stateMotorTwo = 4; // Transition to next state
                     }
                     break;
 
-                case 3:
+                case 4:
                     /***************************Motor Backward State***************************/
 
                     startMotorTwoTimerFlag = true;
@@ -805,25 +820,12 @@ int main(void)
                     {
                         startMotorTwoTimerFlag = false;
                         motorTwoTimer = 0;
-                        stateMotorTwo = 4; // Transition to next state
+                        stateMotorTwo = 1; // Transition to next state
                         mainCounterTwo++;  // Increments motor two counter
                     }
                     break;
 
-                case 4:
-                    /*************************Motor 5 sec Pause State*************************/
-                    startMotorTwoTimerFlag = true;
-                    if (motorTwoTimer <= END_CYCLE_PAUSETIME)
-                    {
-                        SetMotorTwoSpeed(STOP);
-                    }
-                    else
-                    {
-                        startMotorTwoTimerFlag = false;
-                        motorTwoTimer = 0;
-                        stateMotorTwo = 1; // Transition to next state
-                    }
-                    break;
+
                 default:
                     break;
                 }

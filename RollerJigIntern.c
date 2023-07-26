@@ -883,7 +883,7 @@ int main(void)
         default:
             break;
         }
-
+        /*********************************Print Counters 1 and 2*********************************/
         if(!motorOneErrorFlag)
         {
             printCounterDisplayOne(mainCounterOne);

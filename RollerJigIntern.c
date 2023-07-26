@@ -746,7 +746,7 @@ int main(void)
                         stateMotorTwo = 2; // Transition to next state
                     }
                     break;
-
+                    
                 case 2:
                     /***************************Motor Forward State***************************/
 
@@ -825,7 +825,7 @@ int main(void)
                     }
                     break;
 
-
+                
                 default:
                     break;
                 }

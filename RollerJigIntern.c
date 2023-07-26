@@ -53,7 +53,7 @@
  * Outstanding things to do:
  * 1. Implement Pause switch
  * 2. Test 7-segment display code
- * 
+ *
  *********************************************************************************************************************/
 // Include Files
 #include "HL_het.h"
@@ -168,6 +168,14 @@ uint8_t digits_CommAnode[18] =
      0xFF, 0b10111111};
 uint8 au8ErrorInfo[8] = {DASH_SIGN_IND, DASH_SIGN_IND, E_SIGN_IND, E_SIGN_IND, E_SIGN_IND, E_SIGN_IND, DASH_SIGN_IND, DASH_SIGN_IND};
 uint8 au8SpeedData[8] = {DASH_SIGN_IND, DASH_SIGN_IND, 0, 0, 0, 0, DASH_SIGN_IND, DASH_SIGN_IND};
+
+// define start switch
+#define SWITCH_PIN 0U // start switch
+#define SWITCH_PORT gioPORTA
+#define SWITCH_DEBOUNCE_COUNTER 30U
+uint16_t switch_on_cntr = 0;
+uint16_t switch_off_cntr = 0;
+boolean flag_switch_on = false;
 
 /* USER CODE END */
 

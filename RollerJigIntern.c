@@ -53,6 +53,7 @@
  * Outstanding things to do:
  * 1. Implement Pause switch
  * 2. Test 7-segment display code
+ * 3. Fix EEPROM
  *
  *********************************************************************************************************************/
 // Include Files
@@ -116,7 +117,7 @@
 #define FAST 70U
 #define FIRST_RESET_SPEED 90U
 #define NORMAL_SPEED 70U
-#define FIRST_RESET_RUNTIME 100U       // 10 secs
+#define FIRST_RESET_RUNTIME 50U       // 5 secs
 #define FORWARD_PHASE_RUNTIME 30U      // 3 secs
 #define BACKWARD_PHASE_RUNTIME 35U     // 3.5 secs
 #define NORMAL_PHASE_PAUSETIME 10U     // 1 sec
@@ -390,8 +391,8 @@ void printCounterDisplayTwo(uint32_t u32Num)
 #endif
 
         gioSetBit(LED_PORT, LATCH2_PIN, LOW);
-        DisplayDigit(digits_CommAnode[au8Digit]);
-        DisplayDigit(Segment_CommAnode[index]);
+        DisplayDigit_02(digits_CommAnode[au8Digit]);
+        DisplayDigit_02(Segment_CommAnode[index]);
         gioSetBit(LED_PORT, LATCH2_PIN, HIGH);
 
         vDelay_ticks(100);
@@ -481,11 +482,13 @@ int main(void)
     gioEnableNotification(gioPORTA, MOTORTWOENCODERPIN);      // Enable Pin interrupt
     rtiEnableNotification(rtiREG1, rtiNOTIFICATION_COMPARE0); // Enable timer interrupt
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
-
-    // flushEEPROM();
+    //mainCounterOne = 553450;
+    //saveCountersToEEPROM();
+    //flushEEPROM();
     loadCountersFromEEPROM();
     //  Start PWM output & motor
     StartMotorsPWM();
+    //flag_switch_on = true;
 
     while (1)
     {
@@ -559,7 +562,6 @@ int main(void)
                     {
                         SetMotorOneDirection(FORWARD);
                         SetMotorOneSpeed(NORMAL_SPEED);
-                        printCounterDisplayOne(mainCounterOne);
                         /*********Start error checking 1 sec later*********/
                         if (motorOneTimer > ERROR_CHECK_TIME)
                         {
@@ -645,6 +647,10 @@ int main(void)
                 default:
                     break;
                 }
+            }
+            else
+            {
+                SetMotorOneSpeed(STOP);
             }
         break;
 
@@ -746,7 +752,7 @@ int main(void)
                         stateMotorTwo = 2; // Transition to next state
                     }
                     break;
-                    
+
                 case 2:
                     /***************************Motor Forward State***************************/
 
@@ -757,7 +763,6 @@ int main(void)
                     {
                         SetMotorTwoDirection(FORWARD);
                         SetMotorTwoSpeed(NORMAL_SPEED);
-                        printCounterDisplayTwo(mainCounterTwo);
                         /*********Start error checking 1 sec later*********/
                         if (motorTwoTimer > ERROR_CHECK_TIME)
                         {
@@ -825,10 +830,14 @@ int main(void)
                     }
                     break;
 
-                
+
                 default:
                     break;
                 }
+            }
+            else
+            {
+                SetMotorTwoSpeed(STOP);
             }
         break;
 
@@ -856,6 +865,23 @@ int main(void)
             break;
         }
 
+        if(!motorOneErrorFlag)
+        {
+            printCounterDisplayOne(mainCounterOne);
+        }
+        else
+        {
+            displayErrorMotorOne();
+        }
+
+        if(!motorTwoErrorFlag)
+        {
+            printCounterDisplayTwo(mainCounterTwo);
+        }
+        else
+        {
+            displayErrorMotorTwo();
+        }
         // save counters to EEPROM every 12 cycles
         if (((mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL) == 0) || ((mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL) == 0))
         {
@@ -914,7 +940,7 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     {
         motorTwoTimer = 0;
     }
-    //vCheckSwitchStatus();
+    vCheckSwitchStatus();
 }
 
 void esmGroupNotification(int bit)

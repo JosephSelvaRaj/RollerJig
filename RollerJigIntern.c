@@ -114,7 +114,7 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 90U
-#define NORMAL_SPEED 70U
+#define NORMAL_SPEED 62U
 #define FIRST_RESET_RUNTIME 50U       // 5 secs
 #define FORWARD_PHASE_RUNTIME 30U      // 3 secs
 #define BACKWARD_PHASE_RUNTIME 35U     // 3.5 secs
@@ -126,7 +126,7 @@
 // Motor RPM variables
 #define PULSES_PER_ROTATION 12U
 #define TIMER_CYCLES_PER_MINUTE 60U // 60*100ms = 1min
-#define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
+#define MIN_CONSTSPEED_MOTOR_SPEED_RPM 130U
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 
 //EEPROM variables
@@ -883,7 +883,7 @@ int main(void)
         default:
             break;
         }
-        /*********************************Print Counters 1 and 2*********************************/
+
         if(!motorOneErrorFlag)
         {
             printCounterDisplayOne(mainCounterOne);

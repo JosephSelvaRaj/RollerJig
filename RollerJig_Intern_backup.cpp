@@ -492,7 +492,7 @@ int main(void)
                /* even parity , 2 stop bits */
     // flushEEPROM();
     loadCountersFromEEPROM();
-    //mainCounterOne = 553983;
+    // mainCounterOne = 553983;
     StartMotorsPWM(); // Start PWM output & motor
 
     while (1)
@@ -808,6 +808,18 @@ int main(void)
                     motorTwoTimer = 0;
                     stateMotorTwo = 5; // Transition to next state
                     mainCounterTwo++;
+                    // // save counters to EEPROM every 12 cycles
+                    if (((mainCounterOne != 0) && (mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0)) || ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0)))
+                    {
+                        saveCountersToEEPROM();
+                        sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
+                        sciPrintDecimal(UART, mainCounterOne);
+                        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+                        sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
+                        sciPrintDecimal(UART, mainCounterTwo);
+                        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+                        wait(200);
+                    }
                     printCounterDisplayTwo(mainCounterTwo);
                 }
                 break;
@@ -850,32 +862,6 @@ int main(void)
 
             default:
                 break;
-            }
-
-            // // save counters to EEPROM every 12 cycles
-            // if (((mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL) == 0) || ((mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL) == 0))
-            // {
-            //     saveCountersToEEPROM();
-            //     sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
-            //     sciPrintDecimal(UART, mainCounterOne);
-            //     sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-            //     sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
-            //     sciPrintDecimal(UART, mainCounterTwo);
-            //     sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-            //     wait(200);
-            // }
-
-                        // save counters to EEPROM every 12 cycles
-            if ((mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL) == 0)
-            {
-                saveCountersToEEPROM();
-                sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
-                sciPrintDecimal(UART, mainCounterOne);
-                sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-                sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
-                sciPrintDecimal(UART, mainCounterTwo);
-                sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-                wait(200);
             }
 
             /**********************************END OF MAIN PROGRAM FOR RUNNING OF MOTORS**********************************/

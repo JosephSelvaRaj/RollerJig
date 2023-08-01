@@ -914,7 +914,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 
 void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
 {
-    // Increments every 100ms
+    //Every 100ms
 
     /************************RPM Calculation************************/
     volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;

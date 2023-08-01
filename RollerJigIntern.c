@@ -108,7 +108,6 @@
 #define DIG_OFF_IND 16U
 #define DASH_SIGN_IND 17U
 
-// Motor Speed, Direction variables
 //Speed Config
 #define BACKWARD 0U
 #define STOP 0U
@@ -118,7 +117,8 @@
 #define FIRST_RESET_SPEED 99U
 #define NORMAL_SPEED 62U
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
-//Timing Config
+
+//Timing Config (In terms of 100ms cycles)
 #define FIRST_RESET_RUNTIME 30U    // 3 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec

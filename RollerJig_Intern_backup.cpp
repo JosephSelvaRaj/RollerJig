@@ -49,8 +49,8 @@
  *
  *
  * Outstanding things to do:
- * 1. Implement Pause switch
- * 2. Test 7-segment display code
+ * 1. 
+ * 2. 
  *
  *********************************************************************************************************************/
 // Include Files

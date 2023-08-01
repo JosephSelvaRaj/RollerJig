@@ -929,7 +929,7 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     {
         motorOneTimer++;
     }
-    else if (startMotorOneTimerFlag == false)
+    else
     {
         motorOneTimer = 0;
     }

@@ -108,7 +108,8 @@
 #define DIG_OFF_IND 16U
 #define DASH_SIGN_IND 17U
 
-// Motor Speed, Direction & Encoder variables
+// Motor Speed, Direction variables
+//Speed Config
 #define BACKWARD 0U
 #define STOP 0U
 #define FORWARD 1U
@@ -116,21 +117,22 @@
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
 #define NORMAL_SPEED 62U
+#define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
+//Timing Config
 #define FIRST_RESET_RUNTIME 30U    // 3 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
-#define BACKWARD_PHASE_RUNTIME 35U // 3.5 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec
-#define ERROR_CHECK_TIME 10U       // 1 sec
+#define BACKWARD_PHASE_RUNTIME 35U // 3.5 secs
 #define END_CYCLE_PAUSETIME 50U    // 5 secs
+#define ERROR_CHECK_TIME 10U       // 1 sec
 #define ERROR_COOLDOWN_TIME 600U   // 60 secs
 
 // Motor RPM variables
 #define PULSES_PER_ROTATION 12U
 #define TIMER_CYCLES_PER_MINUTE 60U // 60*100ms = 1min
-#define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
-#define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 
 // EEPROM variables
+#define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 #define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U
 const int mainCountersAddress = 0x1U;
 const int mainCounterAddressOffset = 0U;

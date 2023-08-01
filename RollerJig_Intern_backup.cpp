@@ -809,18 +809,11 @@ int main(void)
                     motorTwoTimer = 0;
                     stateMotorTwo = 5; // Transition to next state
                     mainCounterTwo++;
-                    // // save counters to EEPROM every 12 cycles
-                    if (((mainCounterOne != 0) && (mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0)) || ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0)))
+                    if ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0))
                     {
-                        saveCountersToEEPROM();
-                        sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
-                        sciPrintDecimal(UART, mainCounterOne);
-                        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-                        sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
-                        sciPrintDecimal(UART, mainCounterTwo);
-                        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-                        wait(200);
+                        saveToEEPROMFlag = true;
                     }
+
                     printCounterDisplayTwo(mainCounterTwo);
                 }
                 break;
@@ -880,6 +873,20 @@ int main(void)
             // Reset motor timers
             startMotorOneTimerFlag = false;
             startMotorTwoTimerFlag = false;
+        }
+
+        // save counters to EEPROM every 12 cycles
+        if (saveToEEPROMFlag)
+        {
+            saveCountersToEEPROM();
+            sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
+            sciPrintDecimal(UART, mainCounterOne);
+            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+            sciDisplayText(UART, &TEXT4[0], TSIZE4);    /* send text code 3 */
+            sciPrintDecimal(UART, mainCounterTwo);
+            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+            wait(200);
+            saveToEEPROMFlag = false;
         }
 
     } // end of main while loop

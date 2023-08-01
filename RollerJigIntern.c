@@ -532,7 +532,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorOneErrorFlag = true;
                             stateMotorOne = STATE_ERROR;
                         }
                     }
@@ -550,7 +549,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorOneErrorFlag = true;
                             stateMotorOne = STATE_ERROR;
                         }
                     }
@@ -583,7 +581,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorOneErrorFlag = true;
                             stateMotorOne = STATE_ERROR;
                         }
                     }
@@ -632,7 +629,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorOneErrorFlag = true;
                             stateMotorOne = STATE_ERROR;
                         }
                     }
@@ -680,8 +676,6 @@ int main(void)
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
                     stateMotorOne = STATE_FIRST_RESET; // Transition to next state
-
-                    motorOneErrorFlag = false;
                 }
 
                 break;
@@ -710,7 +704,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorTwoErrorFlag = true;
                             stateMotorTwo = STATE_ERROR;
                         }
                     }
@@ -728,7 +721,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorTwoErrorFlag = true;
                             stateMotorTwo = STATE_ERROR;
                         }
                     }
@@ -761,7 +753,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorTwoErrorFlag = true;
                             stateMotorTwo = STATE_ERROR;
                         }
                     }
@@ -810,7 +801,6 @@ int main(void)
                         // Compare RPM for Error
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
-                            motorTwoErrorFlag = true;
                             stateMotorTwo = STATE_ERROR;
                         }
                     }
@@ -860,8 +850,6 @@ int main(void)
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
                     stateMotorTwo = STATE_FIRST_RESET; // Transition to next state
-
-                    motorTwoErrorFlag = false;
                 }
 
                 break;

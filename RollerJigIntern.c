@@ -114,9 +114,9 @@
 #define FORWARD 1U
 #define SLOW 40U
 #define FAST 70U
-#define FIRST_RESET_SPEED 70U
+#define FIRST_RESET_SPEED 99U
 #define NORMAL_SPEED 62U
-#define FIRST_RESET_RUNTIME 10U    // 1 sec
+#define FIRST_RESET_RUNTIME 30U    // 3 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
 #define BACKWARD_PHASE_RUNTIME 35U // 3.5 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec

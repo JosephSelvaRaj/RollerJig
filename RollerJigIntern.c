@@ -129,7 +129,7 @@
 
 // Motor RPM variables
 #define PULSES_PER_ROTATION 12U
-#define TIMER_CYCLES_PER_MINUTE 60U // 60*100ms = 1min
+#define TIMER_CYCLES_PER_MINUTE 600U // 600*100ms = 1min
 
 // EEPROM variables
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles

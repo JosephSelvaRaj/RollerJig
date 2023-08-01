@@ -137,11 +137,21 @@ const int mainCounterAddressOffset = 0U;
 const int mainCounterByteSize = 4U;
 const int mainCountersTotalByteSize = MAIN_COUNTERS_TOTAL_BYTE_SIZE;
 
+enum MotorStates {
+    STATE_FIRST_RESET = 1,
+    STATE_FORWARD_PHASE,
+    STATE_NORMAL_PHASE_PAUSE,
+    STATE_BACKWARD_PHASE,
+    STATE_END_OF_CYCLE_PAUSE,
+    STATE_ERROR,
+};
+
+
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 0;
 
-int stateMotorOne = 1;
-int stateMotorTwo = 1;
+int stateMotorOne = STATE_FIRST_RESET;
+int stateMotorTwo = STATE_FIRST_RESET;
 volatile bool startMotorOneTimerFlag = false;
 volatile bool startMotorTwoTimerFlag = false;
 volatile int motorOneTimer = 0;
@@ -155,8 +165,6 @@ volatile long encoderTwoCounter = 0U;
 volatile int twoSecondTimerLimit = 20U; // Number of 100ms cycles
 volatile int rpmOne = 0U;
 volatile int rpmTwo = 0U;
-volatile bool motorOneErrorFlag = false;
-volatile bool motorTwoErrorFlag = false;
 int eepromFlush = 0;
 
 uint8_t Segment_CommAnode[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
@@ -506,7 +514,7 @@ int main(void)
             /**********************************START OF MAIN PROGRAM FOR RUNNING OF MOTORS**********************************/
             switch (stateMotorOne)
             {
-            case 1:
+            case STATE_FIRST_RESET:
                 /****************************First Reset State****************************/
 
                 startMotorOneTimerFlag = true;
@@ -525,7 +533,7 @@ int main(void)
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorOneErrorFlag = true;
-                            stateMotorOne = 6;
+                            stateMotorOne = STATE_ERROR;
                         }
                     }
                 }
@@ -543,7 +551,7 @@ int main(void)
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorOneErrorFlag = true;
-                            stateMotorOne = 6;
+                            stateMotorOne = STATE_ERROR;
                         }
                     }
                 }
@@ -554,11 +562,11 @@ int main(void)
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
                     SetMotorOneSpeed(STOP);
-                    stateMotorOne = 2; // Transition to next state
+                    stateMotorOne = STATE_FORWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 2:
+            case STATE_FORWARD_PHASE:
                 /***************************Motor Forward State***************************/
 
                 startMotorOneTimerFlag = true;
@@ -576,7 +584,7 @@ int main(void)
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorOneErrorFlag = true;
-                            stateMotorOne = 6;
+                            stateMotorOne = STATE_ERROR;
                         }
                     }
                 }
@@ -584,12 +592,12 @@ int main(void)
                 {
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
-                    stateMotorOne = 3; // Transition to next state
+                    stateMotorOne = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                 }
 
                 break;
 
-            case 3:
+            case STATE_NORMAL_PHASE_PAUSE:
                 /*************************Motor 1 sec Pause State*************************/
 
                 startMotorOneTimerFlag = true;
@@ -603,11 +611,11 @@ int main(void)
                 {
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
-                    stateMotorOne = 4; // Transition to next state
+                    stateMotorOne = STATE_BACKWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 4:
+            case STATE_BACKWARD_PHASE:
                 /***************************Motor Backward State***************************/
 
                 startMotorOneTimerFlag = true;
@@ -625,7 +633,7 @@ int main(void)
                         if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorOneErrorFlag = true;
-                            stateMotorOne = 6;
+                            stateMotorOne = STATE_ERROR;
                         }
                     }
                 }
@@ -633,7 +641,7 @@ int main(void)
                 {
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
-                    stateMotorOne = 5; // Transition to next state
+                    stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                     mainCounterOne++;
                     if ((mainCounterOne != 0) && (mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0))
                     {
@@ -642,7 +650,7 @@ int main(void)
                 }
                 break;
 
-            case 5:
+            case STATE_END_OF_CYCLE_PAUSE:
                 /*************************Motor 5 sec Pause State*************************/
                 startMotorOneTimerFlag = true;
                 printCounterDisplayOne(mainCounterOne);
@@ -654,11 +662,11 @@ int main(void)
                 {
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
-                    stateMotorOne = 2; // Transition to next state
+                    stateMotorOne = STATE_FORWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 6:
+            case STATE_ERROR:
                 /***************************Motor Error State***************************/
                 startMotorOneTimerFlag = true;
 
@@ -671,7 +679,7 @@ int main(void)
                 {
                     startMotorOneTimerFlag = false;
                     motorOneTimer = 0;
-                    stateMotorOne = 1; // Transition to next state
+                    stateMotorOne = STATE_FIRST_RESET; // Transition to next state
 
                     motorOneErrorFlag = false;
                 }
@@ -684,7 +692,7 @@ int main(void)
 
             switch (stateMotorTwo)
             {
-            case 1:
+            case STATE_FIRST_RESET:
                 /****************************First Reset State****************************/
 
                 startMotorTwoTimerFlag = true;
@@ -703,7 +711,7 @@ int main(void)
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorTwoErrorFlag = true;
-                            stateMotorTwo = 6;
+                            stateMotorTwo = STATE_ERROR;
                         }
                     }
                 }
@@ -721,7 +729,7 @@ int main(void)
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorTwoErrorFlag = true;
-                            stateMotorTwo = 6;
+                            stateMotorTwo = STATE_ERROR;
                         }
                     }
                 }
@@ -732,11 +740,11 @@ int main(void)
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
                     SetMotorTwoSpeed(STOP);
-                    stateMotorTwo = 2; // Transition to next state
+                    stateMotorTwo = STATE_FORWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 2:
+            case STATE_FORWARD_PHASE:
                 /***************************Motor Forward State***************************/
 
                 startMotorTwoTimerFlag = true;
@@ -754,7 +762,7 @@ int main(void)
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorTwoErrorFlag = true;
-                            stateMotorTwo = 6;
+                            stateMotorTwo = STATE_ERROR;
                         }
                     }
                 }
@@ -762,12 +770,12 @@ int main(void)
                 {
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
-                    stateMotorTwo = 3; // Transition to next state
+                    stateMotorTwo = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                 }
 
                 break;
 
-            case 3:
+            case STATE_NORMAL_PHASE_PAUSE:
                 /*************************Motor 1 sec Pause State*************************/
 
                 startMotorTwoTimerFlag = true;
@@ -781,11 +789,11 @@ int main(void)
                 {
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
-                    stateMotorTwo = 4; // Transition to next state
+                    stateMotorTwo = STATE_BACKWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 4:
+            case STATE_BACKWARD_PHASE:
                 /***************************Motor Backward State***************************/
 
                 startMotorTwoTimerFlag = true;
@@ -803,7 +811,7 @@ int main(void)
                         if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
                         {
                             motorTwoErrorFlag = true;
-                            stateMotorTwo = 6;
+                            stateMotorTwo = STATE_ERROR;
                         }
                     }
                 }
@@ -811,7 +819,7 @@ int main(void)
                 {
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
-                    stateMotorTwo = 5; // Transition to next state
+                    stateMotorTwo = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                     mainCounterTwo++;
                     if ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0))
                     {
@@ -822,7 +830,7 @@ int main(void)
                 }
                 break;
 
-            case 5:
+            case STATE_END_OF_CYCLE_PAUSE:
                 /*************************Motor 5 sec Pause State*************************/
                 startMotorTwoTimerFlag = true;
                 printCounterDisplayTwo(mainCounterTwo);
@@ -834,11 +842,11 @@ int main(void)
                 {
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
-                    stateMotorTwo = 2; // Transition to next state
+                    stateMotorTwo = STATE_FORWARD_PHASE; // Transition to next state
                 }
                 break;
 
-            case 6:
+            case STATE_ERROR:
                 /***************************Motor Error State***************************/
                 startMotorTwoTimerFlag = true;
 
@@ -851,7 +859,7 @@ int main(void)
                 {
                     startMotorTwoTimerFlag = false;
                     motorTwoTimer = 0;
-                    stateMotorTwo = 1; // Transition to next state
+                    stateMotorTwo = STATE_FIRST_RESET; // Transition to next state
 
                     motorTwoErrorFlag = false;
                 }

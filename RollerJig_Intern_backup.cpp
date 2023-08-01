@@ -811,7 +811,7 @@ int main(void)
                     mainCounterTwo++;
                     if ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0))
                     {
-                        saveToEEPROMFlag = true;
+                        saveToEERPOMFlag = true;
                     }
 
                     printCounterDisplayTwo(mainCounterTwo);
@@ -876,7 +876,7 @@ int main(void)
         }
 
         // save counters to EEPROM every 12 cycles
-        if (saveToEEPROMFlag)
+        if (saveToEERPOMFlag)
         {
             saveCountersToEEPROM();
             sciDisplayText(UART, &TEXT3[0], TSIZE3); /* send text code 3 */
@@ -886,7 +886,7 @@ int main(void)
             sciPrintDecimal(UART, mainCounterTwo);
             sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
             wait(200);
-            saveToEEPROMFlag = false;
+            saveToEERPOMFlag = false;
         }
 
     } // end of main while loop

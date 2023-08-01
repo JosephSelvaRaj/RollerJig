@@ -147,6 +147,7 @@ volatile bool startMotorTwoTimerFlag = false;
 volatile int motorOneTimer = 0;
 volatile int motorTwoTimer = 0;
 bool pauseMotorsFlag = false;
+bool saveToEERPOMFlag = false;
 
 uint16 u16JobResult, Status;
 volatile long encoderOneCounter = 0U;

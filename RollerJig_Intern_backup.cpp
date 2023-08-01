@@ -635,6 +635,10 @@ int main(void)
                     motorOneTimer = 0;
                     stateMotorOne = 5; // Transition to next state
                     mainCounterOne++;
+                    if ((mainCounterOne != 0) && (mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0))
+                    {
+                        saveToEERPOMFlag = true;
+                    }
                 }
                 break;
 

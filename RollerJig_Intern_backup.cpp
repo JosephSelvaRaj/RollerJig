@@ -49,8 +49,8 @@
  *
  *
  * Outstanding things to do:
- * 1. 
- * 2. 
+ * 1.
+ * 2.
  *
  *********************************************************************************************************************/
 // Include Files
@@ -108,7 +108,7 @@
 #define DIG_OFF_IND 16U
 #define DASH_SIGN_IND 17U
 
-//Speed Config
+// Speed Config
 #define BACKWARD 0U
 #define STOP 0U
 #define FORWARD 1U
@@ -118,7 +118,7 @@
 #define NORMAL_SPEED 62U
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
 
-//Timing Config (In terms of 100ms cycles)
+// Timing Config (In terms of 100ms cycles)
 #define FIRST_RESET_RUNTIME 30U    // 3 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec
@@ -139,7 +139,8 @@ const int mainCounterAddressOffset = 0U;
 const int mainCounterByteSize = 4U;
 const int mainCountersTotalByteSize = MAIN_COUNTERS_TOTAL_BYTE_SIZE;
 
-enum MotorState {
+enum MotorState
+{
     STATE_FIRST_RESET = 1,
     STATE_FORWARD_PHASE,
     STATE_NORMAL_PHASE_PAUSE,
@@ -147,7 +148,6 @@ enum MotorState {
     STATE_END_OF_CYCLE_PAUSE,
     STATE_ERROR,
 };
-
 
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 0;
@@ -483,18 +483,16 @@ void wait(uint32 time)
     time--;
 }
 
-
 /* USER CODE END */
 
 int main(void)
 {
     /* USER CODE BEGIN (3) */
-    hetInit();                                                // Initialize PWM High End Timer Module
-    gioInit();                                                // Initialize GIO Module
-    _enable_IRQ();                                            // Enable interrupt vector
-    gioEnableNotification(gioPORTA, MOTORONEENCODERPIN);      // Enable Pin interrupt
-    gioEnableNotification(gioPORTA, MOTORTWOENCODERPIN);      // Enable Pin interrupt
-
+    hetInit();                                           // Initialize PWM High End Timer Module
+    gioInit();                                           // Initialize GIO Module
+    _enable_IRQ();                                       // Enable interrupt vector
+    gioEnableNotification(gioPORTA, MOTORONEENCODERPIN); // Enable Pin interrupt
+    gioEnableNotification(gioPORTA, MOTORTWOENCODERPIN); // Enable Pin interrupt
 
     sciInit(); /* initialize sci/sci-lin    */
                /* even parity , 2 stop bits */
@@ -503,8 +501,10 @@ int main(void)
 
     while (1)
     {
-        
 
+        sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
+        sciPrintDecimal(UART, encoderOneCounter);
+        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
 
     } // end of main while loop
 
@@ -531,7 +531,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 
 void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
 {
-    //Every 100ms
+    // Every 100ms
 
     /************************RPM Calculation************************/
     volatile int numberOfRotationOne = encoderOneCounter / PULSES_PER_ROTATION;

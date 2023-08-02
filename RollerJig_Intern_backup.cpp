@@ -492,8 +492,8 @@ void PIcontrol()
 {
         k = 0.01;
         errorRPM = TargetRPM - rpmOne;
-        pidPWM = errorRPM * k;
-        NORMAL_SPEED = newPWM;
+        pidPWM = NORMAL_SPEED + errorRPM * k;
+        NORMAL_SPEED = pidPWM;
 }
 
 /* USER CODE END */

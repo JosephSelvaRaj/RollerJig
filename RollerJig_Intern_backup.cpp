@@ -55,7 +55,6 @@
  *********************************************************************************************************************/
 // Include Files
 #include "HL_het.h"
-#include "HL_sys_common.h"
 #include "math.h"
 #include "stdlib.h"
 #include "HL_gio.h"
@@ -152,8 +151,8 @@ enum MotorState
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 0;
 
-MotorState stateMotorOne = STATE_FIRST_RESET;
-MotorState stateMotorTwo = STATE_FIRST_RESET;
+int stateMotorOne = STATE_FIRST_RESET;
+int stateMotorTwo = STATE_FIRST_RESET;
 volatile bool startMotorOneTimerFlag = false;
 volatile bool startMotorTwoTimerFlag = false;
 volatile int motorOneTimer = 0;

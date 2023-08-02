@@ -501,9 +501,10 @@ int main(void)
 
     while (1)
     {
-
+        SetMotorOneDirection(FORWARD);
+        SetMotorOneSpeed(62U);
         sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
-        sciPrintDecimal(UART, encoderOneCounter);
+        sciPrintDecimal(UART, rpmOne);
         sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
 
     } // end of main while loop

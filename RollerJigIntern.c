@@ -500,7 +500,7 @@ int main(void)
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
 
     sciInit(); /* initialize sci/sci-lin    */
-               /* even parity , 2 stop bits */
+
     // flushEEPROM();
     loadCountersFromEEPROM();
     // mainCounterOne = 553983;

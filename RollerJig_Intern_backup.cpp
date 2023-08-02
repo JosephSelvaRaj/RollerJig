@@ -505,6 +505,9 @@ int main(void)
         sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
         sciPrintDecimal(UART, rpmOne);
         sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+        //k = 0.1??;
+        //errorRPM = TargetRPM - rpmOne;
+        //newPWM = currentPWM x k
 
     } // end of main while loop
 

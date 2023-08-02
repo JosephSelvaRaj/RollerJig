@@ -488,6 +488,14 @@ void wait(uint32 time)
     time--;
 }
 
+void PIcontrol()
+{
+        k = 0.01;
+        errorRPM = TargetRPM - rpmOne;
+        pidPWM = errorRPM * k;
+        NORMAL_SPEED = newPWM;
+}
+
 /* USER CODE END */
 
 int main(void)
@@ -511,9 +519,7 @@ int main(void)
         sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
         sciPrintDecimal(UART, rpmOne);
         sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-        //k = 0.1??;
-        //errorRPM = TargetRPM - rpmOne;
-        //newPWM = currentPWM x k
+
 
     } // end of main while loop
 

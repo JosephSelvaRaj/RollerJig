@@ -130,6 +130,12 @@
 #define PULSES_PER_ROTATION 12U
 #define TIMER_CYCLES_PER_MINUTE 600U // 600*100ms = 1min
 
+//PID variables
+float k = 0;
+int targetRPM = 0;
+int errorRPM = 0;
+int pidPWM = 0;
+
 // EEPROM variables
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 #define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U

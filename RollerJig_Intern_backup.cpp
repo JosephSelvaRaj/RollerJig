@@ -182,10 +182,9 @@ uint8 au8SpeedData[8] = {DASH_SIGN_IND, DASH_SIGN_IND, 0, 0, 0, 0, DASH_SIGN_IND
 #define UART sciREG1
 #define BREAKSIZE 2
 uint8 BREAK[BREAKSIZE] = {'\n', '\r'};
-#define TSIZE3 18
-uint8_t TEXT3[TSIZE3] = {'S', 'a', 'v', 'e', 'd', ' ', 'C', 'o', 'u', 'n', 't', 'e', 'r', 'O', 'n', 'e', ':', ' '};
-#define TSIZE4 18
-uint8_t TEXT4[TSIZE4] = {'S', 'a', 'v', 'e', 'd', ' ', 'C', 'o', 'u', 'n', 't', 'e', 'r', 'T', 'w', 'o', ':', ' '};
+
+#define TSIZE4 5
+uint8_t TEXT4[TSIZE4] = {'R', 'P', 'M', ':', ' '};
 
 /* USER CODE END */
 
@@ -484,10 +483,7 @@ void wait(uint32 time)
     time--;
 }
 
-void runMotorStateMachine(MotorState* state, unsigned long* timer, bool* timerFlag, int* mainCounter)
-{
 
-}
 /* USER CODE END */
 
 int main(void)
@@ -508,6 +504,7 @@ int main(void)
     while (1)
     {
         
+
 
     } // end of main while loop
 

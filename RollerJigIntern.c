@@ -115,7 +115,7 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
-#define NORMAL_SPEED 62U
+#define NORMAL_SPEED 70U
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
 
 //Timing Config (In terms of 100ms cycles)

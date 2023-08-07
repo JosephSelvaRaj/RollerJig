@@ -134,11 +134,21 @@ uint32_t MotorTwoCCW_SPEED = 64;
 #define TIMER_CYCLES_PER_MINUTE 600U // 600*100ms = 1min
 
 //PID variables
-float k = 0.005;
+float64 kp = 0.005;
+float64 ki = 0.001;
+int imax = 3000;
+int imin = -3000;
 int CWtargetRPM = 2800;
-int CCWtargetRPM = 2570;
+int CCWtargetRPM = 2450;
 int errorRPM = 0;
 int pidPWM = 0;
+int MotorOneCWierrorRPM = 0;
+int MotorOneCCWierrorRPM = 0;
+int MotorTwoCWierrorRPM = 0;
+int MotorTwoCCWierrorRPM = 0;
+
+
+//PID Flags
 bool MotorOneCWPID = false;
 bool MotorOneCCWPID = false;
 bool MotorTwoCWPID = false;
@@ -509,29 +519,73 @@ void wait(uint32 time)
 
 void MotorOneCWPIcontrol()
 {
+    //P Control
     errorRPM = CWtargetRPM - rpmOne;
-    pidPWM = MotorOneCW_SPEED + errorRPM * k;
+    //I Control
+    MotorOneCWierrorRPM += errorRPM;
+    if(MotorOneCWierrorRPM > imax)
+    {
+        MotorOneCWierrorRPM = imax;
+    }
+    else if(MotorOneCWierrorRPM < imin)
+    {
+        MotorOneCWierrorRPM = imin;
+    }
+    pidPWM = MotorOneCW_SPEED + errorRPM * kp + MotorOneCWierrorRPM * ki;
     MotorOneCW_SPEED = pidPWM;
 }
 
 void MotorOneCCWPIcontrol()
 {
+    //P Control
     errorRPM = CCWtargetRPM - rpmOne;
-    pidPWM = MotorOneCCW_SPEED + errorRPM * k;
+    //I Control
+    MotorOneCCWierrorRPM += errorRPM;
+    if(MotorOneCCWierrorRPM > imax)
+    {
+        MotorOneCCWierrorRPM = imax;
+    }
+    else if(MotorOneCCWierrorRPM < imin)
+    {
+        MotorOneCCWierrorRPM = imin;
+    }
+    pidPWM = MotorOneCCW_SPEED + errorRPM * kp + MotorOneCCWierrorRPM * ki;
     MotorOneCCW_SPEED = pidPWM;
 }
 
 void MotorTwoCWPIcontrol()
 {
+    //P Control
     errorRPM = CWtargetRPM - rpmOne;
-    pidPWM = MotorTwoCW_SPEED + errorRPM * k;
+    //I Control
+    MotorTwoCWierrorRPM += errorRPM;
+    if(MotorTwoCWierrorRPM > imax)
+    {
+        MotorTwoCWierrorRPM = imax;
+    }
+    else if(MotorTwoCWierrorRPM < imin)
+    {
+        MotorTwoCWierrorRPM = imin;
+    }
+    pidPWM = MotorTwoCW_SPEED + errorRPM * kp + MotorTwoCWierrorRPM * ki;
     MotorTwoCW_SPEED = pidPWM;
 }
 
 void MotorTwoCCWPIcontrol()
 {
+    //P Control
     errorRPM = CCWtargetRPM - rpmOne;
-    pidPWM = MotorTwoCCW_SPEED + errorRPM * k;
+    //I Control
+    MotorTwoCCWierrorRPM += errorRPM;
+    if(MotorTwoCCWierrorRPM > imax)
+    {
+        MotorTwoCCWierrorRPM = imax;
+    }
+    else if(MotorTwoCCWierrorRPM < imin)
+    {
+        MotorTwoCCWierrorRPM = imin;
+    }
+    pidPWM = MotorTwoCCW_SPEED + errorRPM * kp + MotorTwoCCWierrorRPM * ki;
     MotorTwoCCW_SPEED = pidPWM;
 }
 /* USER CODE END */
@@ -650,8 +704,8 @@ int main(void)
                         /*********Start error checking 1 sec later*********/
                         if (motorOneTimer > ERROR_CHECK_TIME)
                         {
-                            // Compare RPM for Error
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 28U)
+                            // Compare RPM for Error from 1 sec to 2 sec
+                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 20U)
                             {
                                 startMotorOneTimerFlag = false;
                                 stateMotorOne = STATE_ERROR;
@@ -710,8 +764,8 @@ int main(void)
                         /*********Start error checking 1 sec later*********/
                         if (motorOneTimer > ERROR_CHECK_TIME)
                         {
-                            // Compare RPM for Error
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 33U)
+                            // Compare RPM for Error from 1 sec to 2 sec
+                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 20U)
                             {
                                 startMotorOneTimerFlag = false;
                                 stateMotorOne = STATE_ERROR;
@@ -858,8 +912,8 @@ int main(void)
                         /*********Start error checking 1 sec later*********/
                         if (motorTwoTimer > ERROR_CHECK_TIME)
                         {
-                            // Compare RPM for Error
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 28U)
+                            // Compare RPM for Error from 1 sec to 2 sec
+                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 20U)
                             {
                                 startMotorTwoTimerFlag = false;
                                 stateMotorTwo = STATE_ERROR;
@@ -918,8 +972,8 @@ int main(void)
                         /*********Start error checking 1 sec later*********/
                         if (motorTwoTimer > ERROR_CHECK_TIME)
                         {
-                            // Compare RPM for Error
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 33U)
+                            // Compare RPM for Error from 1 sec to 2 sec
+                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 20U)
                             {
                                 startMotorTwoTimerFlag = false;
                                 stateMotorTwo = STATE_ERROR;

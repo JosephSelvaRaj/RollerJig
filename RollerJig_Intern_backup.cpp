@@ -142,6 +142,10 @@ int CWtargetRPM = 2800;
 int CCWtargetRPM = 2450;
 int errorRPM = 0;
 int pidPWM = 0;
+int cwmax = 76U;
+int cwmin = 64U;
+int ccwmax = 70U;
+int ccwmin = 60U;
 int MotorOneCWierrorRPM = 0;
 int MotorOneCCWierrorRPM = 0;
 int MotorTwoCWierrorRPM = 0;
@@ -544,13 +548,13 @@ void MotorOneCWPIcontrol()
     pidPWM = MotorOneCW_SPEED + errorRPM * kp + MotorOneCWierrorRPM * ki;
     MotorOneCW_SPEED = pidPWM;
 
-    if(MotorOneCW_SPEED > 76U)
+    if(MotorOneCW_SPEED > cwmax)
     {
-        MotorOneCW_SPEED = 76U;
+        MotorOneCW_SPEED = cwmax;
     }
-    else if (MotorOneCW_SPEED < 64)
+    else if (MotorOneCW_SPEED < cwmin)
     {
-        MotorOneCW_SPEED = 64;
+        MotorOneCW_SPEED = cwmin;
     }
 }
 
@@ -571,13 +575,13 @@ void MotorOneCCWPIcontrol()
     pidPWM = MotorOneCCW_SPEED + errorRPM * kp + MotorOneCCWierrorRPM * ki;
     MotorOneCCW_SPEED = pidPWM;
 
-    if(MotorOneCCW_SPEED > 70U)
+    if(MotorOneCCW_SPEED > ccwmax)
     {
-        MotorOneCCW_SPEED = 70U;
+        MotorOneCCW_SPEED = ccwmax;
     }
-    else if (MotorOneCCW_SPEED < 60)
+    else if (MotorOneCCW_SPEED < ccwmin)
     {
-        MotorOneCCW_SPEED = 60;
+        MotorOneCCW_SPEED = ccwmin;
     }
 }
 
@@ -598,13 +602,13 @@ void MotorTwoCWPIcontrol()
     pidPWM = MotorTwoCW_SPEED + errorRPM * kp + MotorTwoCWierrorRPM * ki;
     MotorTwoCW_SPEED = pidPWM;
 
-    if(MotorTwoCW_SPEED > 76U)
+    if(MotorTwoCW_SPEED > cwmax)
     {
-        MotorTwoCW_SPEED = 76U;
+        MotorTwoCW_SPEED = cwmax;
     }
-    else if (MotorTwoCW_SPEED < 64)
+    else if (MotorTwoCW_SPEED < cwmin)
     {
-        MotorTwoCW_SPEED = 64;
+        MotorTwoCW_SPEED = cwmin;
     }
 }
 
@@ -625,13 +629,13 @@ void MotorTwoCCWPIcontrol()
     pidPWM = MotorTwoCCW_SPEED + errorRPM * kp + MotorTwoCCWierrorRPM * ki;
     MotorTwoCCW_SPEED = pidPWM;
 
-    if(MotorTwoCCW_SPEED > 70U)
+    if(MotorTwoCCW_SPEED > ccwmax)
     {
-        MotorTwoCCW_SPEED = 70U;
+        MotorTwoCCW_SPEED = ccwmax;
     }
-    else if (MotorTwoCCW_SPEED < 60)
+    else if (MotorTwoCCW_SPEED < ccwmin)
     {
-        MotorTwoCCW_SPEED = 60;
+        MotorTwoCCW_SPEED = ccwmin;
     }
 }
 /* USER CODE END */

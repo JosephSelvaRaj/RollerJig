@@ -661,15 +661,15 @@ int main(void)
 
     while (1)
     {
-//        if (RPMPrint)
-//        {
-//            sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
-//            sciPrintDecimal(UART, rpmOne);
-//            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-//            sciPrintDecimal(UART, MotorOnePosition);
-//            sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-//            RPMPrint = false;
-//        }
+    //    if (RPMPrint)
+    //    {
+    //        sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
+    //        sciPrintDecimal(UART, rpmOne);
+    //        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+    //        sciPrintDecimal(UART, MotorOnePosition);
+    //        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+    //        RPMPrint = false;
+    //    }
 
          CheckSwitchStatus();
 
@@ -1099,6 +1099,39 @@ int main(void)
                 break;
             }
         }
+        
+        //pause switch is flipped
+        else
+        {
+            // Stop motors
+            SetMotorOneSpeed(STOP);
+            SetMotorTwoSpeed(STOP);
+            // Update display to prevent flickering
+            printCounterDisplayTwo(mainCounterTwo);
+            printCounterDisplayOne(mainCounterOne);
+            // off all flags
+            MotorOneCWPID = false;
+            MotorOneCCWPID = false;
+            MotorOneMotion = false;
+            MotorOneForward = false;
+            MotorOneBackward = false;
+            MotorOneCheck = false;
+
+            MotorTwoCWPID = false;
+            MotorTwoCCWPID = false;
+            MotorTwoMotion = false;
+            MotorTwoForward = false;
+            MotorTwoBackward = false;
+            MotorTwoCheck = false;
+
+            startMotorOneTimerFlag = false;
+            startMotorTwoTimerFlag = false;
+
+            motorOneTimer = 0;
+            motorTwoTimer = 0;
+        }
+            
+        
 
 
     } // end of main while loop

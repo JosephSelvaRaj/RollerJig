@@ -177,6 +177,10 @@ bool MotorTwoBackward = false;
 volatile long MotorOnePosition = 0U;
 volatile long MotorTwoPosition = 0U;
 
+//Pause Timer Variable
+volatile int PauseTimer = 0;
+bool Pause = false;
+
 // EEPROM variables
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 #define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U
@@ -676,7 +680,7 @@ int main(void)
         // Pause switch is off
         if (!pauseMotorsFlag)
         {
-
+            Pause = false;
             switch(stateMotorOne)
             {
                 case STATE_FIRST_RESET:
@@ -1129,6 +1133,12 @@ int main(void)
 
             motorOneTimer = 0;
             motorTwoTimer = 0;
+
+            Pause = true;
+            if(PauseTimer == 600)
+            {
+                saveCountersToEEPROM();
+            }
         }
 
 
@@ -1207,6 +1217,14 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
         motorTwoTimer = 0;
     }
 
+    if (Pause)
+    {
+        PauseTimer++;
+    }
+    else
+    {
+        PauseTimer = 0;
+    }
     /**************************Error Check*************************/
     if(MotorOneCheck)
     {

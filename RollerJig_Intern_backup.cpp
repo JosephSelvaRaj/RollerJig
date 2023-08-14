@@ -661,15 +661,15 @@ int main(void)
 
     while (1)
     {
-    //    if (RPMPrint)
-    //    {
-    //        sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
-    //        sciPrintDecimal(UART, rpmOne);
-    //        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-    //        sciPrintDecimal(UART, MotorOnePosition);
-    //        sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
-    //        RPMPrint = false;
-    //    }
+//       if (RPMPrint)
+//       {
+//           sciDisplayText(UART, &TEXT4[0], TSIZE4); /* send text code 3 */
+//           sciPrintDecimal(UART, rpmOne);
+//           sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+//           sciPrintDecimal(UART, MotorOnePosition);
+//           sciDisplayText(UART, &BREAK[0], BREAKSIZE); /* send text code 3 */
+//           RPMPrint = false;
+//       }
 
          CheckSwitchStatus();
 
@@ -1099,7 +1099,7 @@ int main(void)
                 break;
             }
         }
-        
+
         //pause switch is flipped
         else
         {
@@ -1130,8 +1130,8 @@ int main(void)
             motorOneTimer = 0;
             motorTwoTimer = 0;
         }
-            
-        
+
+
 
 
     } // end of main while loop

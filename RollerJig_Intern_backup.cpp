@@ -121,7 +121,7 @@ uint32_t MotorTwoCCW_SPEED = 64;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
 
 // Timing Config (In terms of 100ms cycles)
-#define FIRST_RESET_RUNTIME 30U    // 3 sec
+#define FIRST_RESET_RUNTIME 15U    // 1.5 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec
 #define BACKWARD_PHASE_RUNTIME 35U // 3.5 secs
@@ -155,6 +155,14 @@ bool MotorTwoCWPID = false;
 bool MotorTwoCCWPID = false;
 bool RPMPrint = true;
 
+//Error Check Flags
+bool MotorOneCheck = false;
+bool MotorTwoCheck = false;
+
+//Error Check Variables
+int MotorOneErrorCounter = 0;
+int MotorTwoErrorCounter = 0;
+
 //Motor Motion/Position
 bool MotorOneMotion = false;
 bool MotorTwoMotion = false;
@@ -185,6 +193,8 @@ enum MotorState
 
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 0;
+int MotorOneEepromCounter = 0;
+int MotorTwoEepromCounter = 0;
 
 int stateMotorOne = STATE_FIRST_RESET;
 int stateMotorTwo = STATE_FIRST_RESET;
@@ -533,6 +543,15 @@ void MotorOneCWPIcontrol()
     }
     pidPWM = MotorOneCW_SPEED + errorRPM * kp + MotorOneCWierrorRPM * ki;
     MotorOneCW_SPEED = pidPWM;
+
+    if(MotorOneCW_SPEED > 76U)
+    {
+        MotorOneCW_SPEED = 76U;
+    }
+    else if (MotorOneCW_SPEED < 64)
+    {
+        MotorOneCW_SPEED = 64;
+    }
 }
 
 void MotorOneCCWPIcontrol()
@@ -551,6 +570,15 @@ void MotorOneCCWPIcontrol()
     }
     pidPWM = MotorOneCCW_SPEED + errorRPM * kp + MotorOneCCWierrorRPM * ki;
     MotorOneCCW_SPEED = pidPWM;
+
+    if(MotorOneCCW_SPEED > 70U)
+    {
+        MotorOneCCW_SPEED = 70U;
+    }
+    else if (MotorOneCCW_SPEED < 60)
+    {
+        MotorOneCCW_SPEED = 60;
+    }
 }
 
 void MotorTwoCWPIcontrol()
@@ -569,6 +597,15 @@ void MotorTwoCWPIcontrol()
     }
     pidPWM = MotorTwoCW_SPEED + errorRPM * kp + MotorTwoCWierrorRPM * ki;
     MotorTwoCW_SPEED = pidPWM;
+
+    if(MotorTwoCW_SPEED > 76U)
+    {
+        MotorTwoCW_SPEED = 76U;
+    }
+    else if (MotorTwoCW_SPEED < 64)
+    {
+        MotorTwoCW_SPEED = 64;
+    }
 }
 
 void MotorTwoCCWPIcontrol()
@@ -587,6 +624,15 @@ void MotorTwoCCWPIcontrol()
     }
     pidPWM = MotorTwoCCW_SPEED + errorRPM * kp + MotorTwoCCWierrorRPM * ki;
     MotorTwoCCW_SPEED = pidPWM;
+
+    if(MotorTwoCCW_SPEED > 70U)
+    {
+        MotorTwoCCW_SPEED = 70U;
+    }
+    else if (MotorTwoCCW_SPEED < 60)
+    {
+        MotorTwoCCW_SPEED = 60;
+    }
 }
 /* USER CODE END */
 
@@ -637,10 +683,11 @@ int main(void)
                     MotorOneCCWPID = false;
                     printCounterDisplayOne(mainCounterOne);
 
-                    /*********Run motor forward for 3 secs*********/
+                    /*********Run motor forward for 1.5 secs*********/
                     if (motorOneTimer <= FIRST_RESET_RUNTIME)
                     {
                         MotorOneMotion = true;
+                        MotorOneCheck = false;
                         SetMotorOneDirection(FORWARD);
                         SetMotorOneSpeed(FIRST_RESET_SPEED);
 
@@ -648,29 +695,22 @@ int main(void)
                         if (motorOneTimer > ERROR_CHECK_TIME)
                         {
                             // Compare RPM for Error
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-                            {
-                                startMotorOneTimerFlag = false;
-                                stateMotorOne = STATE_ERROR;
-                            }
+                            MotorOneCheck = true;
                         }
                     }
 
-                    /*********Run motor backward for 3 secs*********/
+                    /*********Run motor backward for 1.5 secs*********/
                     else if (motorOneTimer > FIRST_RESET_RUNTIME && motorOneTimer <= (FIRST_RESET_RUNTIME + FIRST_RESET_RUNTIME))
                     {
                         SetMotorOneDirection(BACKWARD);
                         SetMotorOneSpeed(FIRST_RESET_SPEED);
+                        MotorOneCheck = false;
 
                         /*********Start error checking 1 sec later*********/
                         if (motorOneTimer > (FIRST_RESET_RUNTIME + ERROR_CHECK_TIME))
                         {
                             // Compare RPM for Error
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-                            {
-                                startMotorOneTimerFlag = false;
-                                stateMotorOne = STATE_ERROR;
-                            }
+                            MotorOneCheck = true;
                         }
                     }
 
@@ -679,7 +719,9 @@ int main(void)
                     {
                         startMotorOneTimerFlag = false;
                         MotorOneMotion = false;
+                        MotorOneCheck = false;
                         motorOneTimer = 0;
+                        MotorOneErrorCounter = 0;
                         SetMotorOneSpeed(STOP);
                         stateMotorOne = STATE_FORWARD_PHASE; // Transition to next state
                     }
@@ -701,23 +743,22 @@ int main(void)
                         SetMotorOneDirection(FORWARD);
                         SetMotorOneSpeed(MotorOneCW_SPEED);
                         MotorOneCWPID = true;
+                        MotorOneCheck = false;
                         /*********Start error checking 1 sec later*********/
-                        if (motorOneTimer > ERROR_CHECK_TIME)
+                        if (motorOneTimer > ERROR_CHECK_TIME && motorOneTimer < 20U)
                         {
                             // Compare RPM for Error from 1 sec to 2 sec
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 20U)
-                            {
-                                startMotorOneTimerFlag = false;
-                                stateMotorOne = STATE_ERROR;
-                            }
+                            MotorOneCheck = true;
                         }
                     }
                     else
                     {
                         startMotorOneTimerFlag = false;
+                        MotorOneCheck = false;
                         motorOneTimer = 0;
                         stateMotorOne = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                         MotorOneCWPID = false;
+                        MotorOneErrorCounter = 0;
                     }
 
                     break;
@@ -731,6 +772,8 @@ int main(void)
                     MotorOneMotion = false;
                     MotorOneForward = false;
                     MotorOneBackward = false;
+                    MotorOneCheck = false;
+                    MotorOneErrorCounter = 0;
                     printCounterDisplayOne(mainCounterOne);
 
                     if (motorOneTimer <= NORMAL_PHASE_PAUSETIME)
@@ -761,15 +804,12 @@ int main(void)
                         SetMotorOneDirection(BACKWARD);
                         SetMotorOneSpeed(MotorOneCCW_SPEED);
                         MotorOneCCWPID = true;
+                        MotorOneCheck = false;
                         /*********Start error checking 1 sec later*********/
-                        if (motorOneTimer > ERROR_CHECK_TIME)
+                        if (motorOneTimer > ERROR_CHECK_TIME && motorOneTimer < 20U)
                         {
                             // Compare RPM for Error from 1 sec to 2 sec
-                            if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorOneTimer < 20U)
-                            {
-                                startMotorOneTimerFlag = false;
-                                stateMotorOne = STATE_ERROR;
-                            }
+                            MotorOneCheck = true;
                         }
                     }
                     else
@@ -777,11 +817,15 @@ int main(void)
                         startMotorOneTimerFlag = false;
                         motorOneTimer = 0;
                         MotorOneCCWPID = false;
+                        MotorOneCheck = false;
+                        MotorOneErrorCounter = 0;
                         stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                         mainCounterOne++;
-                        if ((mainCounterOne != 0) && (mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0))
+                        MotorOneEepromCounter++;
+                        if (MotorOneEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
                         {
-                            saveToEERPOMFlag = true;
+                            saveCountersToEEPROM();
+                            MotorOneEepromCounter = 0;
                         }
                     }
                     break;
@@ -794,6 +838,8 @@ int main(void)
                     MotorOneMotion = false;
                     MotorOneForward = false;
                     MotorOneBackward = false;
+                    MotorOneCheck = false;
+                    MotorOneErrorCounter = 0;
                     printCounterDisplayOne(mainCounterOne);
                     if (motorOneTimer <= END_CYCLE_PAUSETIME)
                     {
@@ -815,6 +861,8 @@ int main(void)
                     MotorOneMotion = false;
                     MotorOneForward = false;
                     MotorOneBackward = false;
+                    MotorOneCheck = false;
+                    MotorOneErrorCounter = 0;
 
                     if (motorOneTimer <= ERROR_COOLDOWN_TIME)
                     {
@@ -844,10 +892,11 @@ int main(void)
                     MotorTwoCCWPID = false;
                     printCounterDisplayTwo(mainCounterTwo);
 
-                    /*********Run motor forward for 3 secs*********/
+                    /*********Run motor forward for 1.5 secs*********/
                     if (motorTwoTimer <= FIRST_RESET_RUNTIME)
                     {
                         MotorTwoMotion = true;
+                        MotorTwoCheck = false;
                         SetMotorTwoDirection(FORWARD);
                         SetMotorTwoSpeed(FIRST_RESET_SPEED);
 
@@ -855,29 +904,23 @@ int main(void)
                         if (motorTwoTimer > ERROR_CHECK_TIME)
                         {
                             // Compare RPM for Error
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-                            {
-                                startMotorTwoTimerFlag = false;
-                                stateMotorTwo = STATE_ERROR;
-                            }
+                            MotorTwoCheck = true;
                         }
                     }
 
-                    /*********Run motor backward for 3 secs*********/
+                    /*********Run motor backward for 1.5 secs*********/
                     else if (motorTwoTimer > FIRST_RESET_RUNTIME && motorTwoTimer <= (FIRST_RESET_RUNTIME + FIRST_RESET_RUNTIME))
                     {
+                        MotorTwoCheck = false;
                         SetMotorTwoDirection(BACKWARD);
                         SetMotorTwoSpeed(FIRST_RESET_SPEED);
+
 
                         /*********Start error checking 1 sec later*********/
                         if (motorTwoTimer > (FIRST_RESET_RUNTIME + ERROR_CHECK_TIME))
                         {
                             // Compare RPM for Error
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
-                            {
-                                startMotorTwoTimerFlag = false;
-                                stateMotorTwo = STATE_ERROR;
-                            }
+                            MotorTwoCheck = true;
                         }
                     }
 
@@ -885,8 +928,10 @@ int main(void)
                     else
                     {
                         MotorTwoMotion = false;
+                        MotorTwoCheck = false;
                         startMotorTwoTimerFlag = false;
                         motorTwoTimer = 0;
+                        MotorTwoErrorCounter = 0;
                         SetMotorTwoSpeed(STOP);
                         stateMotorTwo = STATE_FORWARD_PHASE; // Transition to next state
                     }
@@ -908,24 +953,23 @@ int main(void)
                         SetMotorTwoDirection(FORWARD);
                         SetMotorOneSpeed(MotorTwoCW_SPEED);
                         MotorTwoCWPID = true;
+                        MotorTwoCheck = false;
 
                         /*********Start error checking 1 sec later*********/
-                        if (motorTwoTimer > ERROR_CHECK_TIME)
+                        if (motorTwoTimer > ERROR_CHECK_TIME && motorTwoTimer < 20U)
                         {
                             // Compare RPM for Error from 1 sec to 2 sec
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 20U)
-                            {
-                                startMotorTwoTimerFlag = false;
-                                stateMotorTwo = STATE_ERROR;
-                            }
+                            MotorTwoCheck = true;
                         }
                     }
                     else
                     {
                         startMotorTwoTimerFlag = false;
                         motorTwoTimer = 0;
+                        MotorTwoErrorCounter = 0;
                         stateMotorTwo = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                         MotorTwoCWPID = false;
+                        MotorTwoCheck = false;
                     }
 
                 break;
@@ -939,6 +983,8 @@ int main(void)
                     MotorTwoMotion = false;
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
+                    MotorTwoCheck = false;
+                    MotorTwoErrorCounter = 0;
                     printCounterDisplayTwo(mainCounterTwo);
 
                     if (motorTwoTimer <= NORMAL_PHASE_PAUSETIME)
@@ -966,18 +1012,15 @@ int main(void)
                     if (motorTwoTimer <= BACKWARD_PHASE_RUNTIME)
                     {
                         MotorTwoMotion = true;
+                        MotorTwoCheck = false;
                         SetMotorTwoDirection(BACKWARD);
                         SetMotorOneSpeed(MotorTwoCCW_SPEED);
                         MotorTwoCCWPID = true;
                         /*********Start error checking 1 sec later*********/
-                        if (motorTwoTimer > ERROR_CHECK_TIME)
+                        if (motorTwoTimer > ERROR_CHECK_TIME && motorTwoTimer < 20U)
                         {
                             // Compare RPM for Error from 1 sec to 2 sec
-                            if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM && motorTwoTimer < 20U)
-                            {
-                                startMotorTwoTimerFlag = false;
-                                stateMotorTwo = STATE_ERROR;
-                            }
+                            MotorTwoCheck = true;
                         }
                     }
                     else
@@ -986,10 +1029,14 @@ int main(void)
                         motorTwoTimer = 0;
                         stateMotorTwo = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                         mainCounterTwo++;
+                        MotorTwoEepromCounter++;
                         MotorTwoCCWPID = false;
-                        if ((mainCounterTwo != 0) && (mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0))
+                        MotorTwoCheck = false;
+                        MotorTwoErrorCounter = 0;
+                        if (MotorTwoEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
                         {
-                            saveToEERPOMFlag = true;
+                            saveCountersToEEPROM();
+                            MotorTwoEepromCounter = 0;
                         }
 
                         printCounterDisplayTwo(mainCounterTwo);
@@ -1004,6 +1051,8 @@ int main(void)
                     MotorTwoMotion = false;
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
+                    MotorTwoCheck = false;
+                    MotorTwoErrorCounter = 0;
                     printCounterDisplayTwo(mainCounterTwo);
                     if (motorTwoTimer <= END_CYCLE_PAUSETIME)
                     {
@@ -1025,6 +1074,8 @@ int main(void)
                     MotorTwoMotion = false;
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
+                    MotorTwoCheck = false;
+                    MotorTwoErrorCounter = 0;
 
                     if (motorTwoTimer <= ERROR_COOLDOWN_TIME)
                     {
@@ -1100,8 +1151,7 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     RPMPrint = true;
     encoderOneCounter = 0;
     encoderTwoCounter = 0;
-    /**************************************************************/
-
+    /**************************Timer Counter***********************/
     if (startMotorOneTimerFlag)
     {
         motorOneTimer++;
@@ -1120,6 +1170,36 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
         motorTwoTimer = 0;
     }
 
+    /**************************Error Check*************************/
+    if(MotorOneCheck)
+    {
+        if (rpmOne < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+        {
+            MotorOneErrorCounter++;
+            if(MotorOneErrorCounter == 3)
+            {
+                startMotorOneTimerFlag = false;
+                stateMotorOne = STATE_ERROR;
+                MotorOneErrorCounter = 0;
+            }
+        }
+    }
+    if(MotorTwoCheck)
+    {
+        if (rpmTwo < MIN_CONSTSPEED_MOTOR_SPEED_RPM)
+        {
+            MotorTwoErrorCounter++;
+            if(MotorTwoErrorCounter == 3)
+            {
+                startMotorTwoTimerFlag = false;
+                stateMotorTwo = STATE_ERROR;
+                MotorTwoErrorCounter = 0;
+            }
+
+        }
+    }
+
+    /********************PI Control********************************/
     if(MotorOneCWPID)
     {
         MotorOneCWPIcontrol();

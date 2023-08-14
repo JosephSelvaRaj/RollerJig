@@ -119,7 +119,7 @@
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 100U
 
 //Timing Config (In terms of 100ms cycles)
-#define FIRST_RESET_RUNTIME 30U    // 3 sec
+#define FIRST_RESET_RUNTIME 15U    // 1.5 sec
 #define FORWARD_PHASE_RUNTIME 30U  // 3 secs
 #define NORMAL_PHASE_PAUSETIME 10U // 1 sec
 #define BACKWARD_PHASE_RUNTIME 35U // 3.5 secs

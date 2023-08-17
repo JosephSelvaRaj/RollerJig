@@ -50,7 +50,7 @@ const uint8_t DASH_SIGN = 0b01000000;	//no need
 #define E_SIGN_IND     14U              //array 14 in digits_CommAnode[18]
 uint8_t Segment_CommAnode[4]=
 {
-    0x08, 0x04, 0x02, 0x01    //Example code uses this way 0x01, 0x02, 0x04, 0x08
+    0x08, 0x04, 0x02, 0x01    //Example code uses this way 0x01, 0x02, 0x04, 0x08, doing this will flip the direction of the digits, example 4321 will become 1234
 };
 
 

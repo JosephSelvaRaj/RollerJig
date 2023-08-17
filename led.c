@@ -203,7 +203,6 @@ void vLedTube_Update4Digits(uint32_t u32Num)
 		//vLedTube_Disp1Digit(Tube_Index[index]);
 		// pull high the latch to save the digit information
 		gioSetBit(LED_PORT, LATCH_PIN, PIN_HIGH);
-        
 		// set a little delay
 		vDelay_ticks(100);
 	}

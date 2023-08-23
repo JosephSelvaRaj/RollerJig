@@ -144,17 +144,19 @@ uint32_t MotorTwoCCW_SPEED = 64;
 
 //PID variables
 float64 kp = 0.005;
-float64 ki = 0.001;
+float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
-int CWtargetRPM = 2650;
-int CCWtargetRPM = 2500;
+int CWtargetRPM = 2700;
+int CCWtargetRPM = 2300;
 int errorRPM = 0;
+int errorTwoRPM = 0;
 int pidPWM = 0;
-int cwmax = 77U;
-int cwmin = 72U;
-int ccwmax = 71U;
-int ccwmin = 66U;
+int pidPWMTwo = 0;
+int cwmax = 80U;
+int cwmin = 75U;            
+int ccwmax = 75U;
+int ccwmin = 69U;
 int MotorOneCWierrorRPM = 0;
 int MotorOneCCWierrorRPM = 0;
 int MotorTwoCWierrorRPM = 0;
@@ -693,9 +695,9 @@ void MotorOneCCWPIcontrol()
 void MotorTwoCWPIcontrol()
 {
     //P Control
-    errorRPM = CWtargetRPM - rpmOne;
+    errorTwoRPM = CWtargetRPM - rpmTwo;
     //I Control
-    MotorTwoCWierrorRPM += errorRPM;
+    MotorTwoCWierrorRPM += errorTwoRPM;
     if(MotorTwoCWierrorRPM > imax)
     {
         MotorTwoCWierrorRPM = imax;
@@ -704,8 +706,8 @@ void MotorTwoCWPIcontrol()
     {
         MotorTwoCWierrorRPM = imin;
     }
-    pidPWM = MotorTwoCW_SPEED + errorRPM * kp + MotorTwoCWierrorRPM * ki;
-    MotorTwoCW_SPEED = pidPWM;
+    pidPWMTwo = MotorTwoCW_SPEED + errorTwoRPM * kp + MotorTwoCWierrorRPM * ki;
+    MotorTwoCW_SPEED = pidPWMTwo;
 
     if(MotorTwoCW_SPEED > cwmax)
     {
@@ -720,9 +722,9 @@ void MotorTwoCWPIcontrol()
 void MotorTwoCCWPIcontrol()
 {
     //P Control
-    errorRPM = CCWtargetRPM - rpmOne;
+    errorTwoRPM = CCWtargetRPM - rpmTwo;
     //I Control
-    MotorTwoCCWierrorRPM += errorRPM;
+    MotorTwoCCWierrorRPM += errorTwoRPM;
     if(MotorTwoCCWierrorRPM > imax)
     {
         MotorTwoCCWierrorRPM = imax;
@@ -731,8 +733,8 @@ void MotorTwoCCWPIcontrol()
     {
         MotorTwoCCWierrorRPM = imin;
     }
-    pidPWM = MotorTwoCCW_SPEED + errorRPM * kp + MotorTwoCCWierrorRPM * ki;
-    MotorTwoCCW_SPEED = pidPWM;
+    pidPWMTwo = MotorTwoCCW_SPEED + errorTwoRPM * kp + MotorTwoCCWierrorRPM * ki;
+    MotorTwoCCW_SPEED = pidPWMTwo;
 
     if(MotorTwoCCW_SPEED > ccwmax)
     {
@@ -761,7 +763,6 @@ int main(void)
     sciInit(); /* initialize sci/sci-lin    */
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
-
     StartMotorsPWM(); // Start PWM output & motor
 
     while (1)

@@ -121,11 +121,14 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
-uint32_t MotorOneCW_SPEED = 70;
-uint32_t MotorOneCCW_SPEED = 64;
-uint32_t MotorTwoCW_SPEED = 70;
-uint32_t MotorTwoCCW_SPEED = 64;
+uint32_t MotorOneCW_SPEED = 65;
+uint32_t MotorOneCCW_SPEED = 59;
+uint32_t MotorTwoCW_SPEED = 65;
+uint32_t MotorTwoCCW_SPEED = 59;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
+#define MotorOneFULLCYCLE 1900U
+#define MotorTwoFULLCYCLE 1900U
+
 
 // Timing Config (In terms of 50ms cycles)
 #define FIRST_RESET_RUNTIME 30U    // 1.5 sec
@@ -147,16 +150,21 @@ float64 kp = 0.005;
 float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
-int CWtargetRPM = 2700;
-int CCWtargetRPM = 2300;
+int CWtargetRPM = 2400;
+int CCWtargetRPM = 1800;
 int errorRPM = 0;
 int errorTwoRPM = 0;
 int pidPWM = 0;
 int pidPWMTwo = 0;
-int cwmax = 80U;
-int cwmin = 75U;            
-int ccwmax = 75U;
-int ccwmin = 69U;
+int MotorOnecwmax = 65U;
+int MotorOnecwmin = 59U;
+int MotorOneccwmax = 65U;
+int MotorOneccwmin = 59U;
+
+int MotorTwocwmax = 65U;
+int MotorTwocwmin = 59U;
+int MotorTwoccwmax = 65U;
+int MotorTwoccwmin = 59U;
 int MotorOneCWierrorRPM = 0;
 int MotorOneCCWierrorRPM = 0;
 int MotorTwoCWierrorRPM = 0;
@@ -655,13 +663,13 @@ void MotorOneCWPIcontrol()
     pidPWM = MotorOneCW_SPEED + errorRPM * kp + MotorOneCWierrorRPM * ki;
     MotorOneCW_SPEED = pidPWM;
 
-    if(MotorOneCW_SPEED > cwmax)
+    if(MotorOneCW_SPEED > MotorOnecwmax)
     {
-        MotorOneCW_SPEED = cwmax;
+        MotorOneCW_SPEED = MotorOnecwmax;
     }
-    else if (MotorOneCW_SPEED < cwmin)
+    else if (MotorOneCW_SPEED < MotorOnecwmin)
     {
-        MotorOneCW_SPEED = cwmin;
+        MotorOneCW_SPEED = MotorOnecwmin;
     }
 }
 
@@ -682,13 +690,13 @@ void MotorOneCCWPIcontrol()
     pidPWM = MotorOneCCW_SPEED + errorRPM * kp + MotorOneCCWierrorRPM * ki;
     MotorOneCCW_SPEED = pidPWM;
 
-    if(MotorOneCCW_SPEED > ccwmax)
+    if(MotorOneCCW_SPEED > MotorOneccwmax)
     {
-        MotorOneCCW_SPEED = ccwmax;
+        MotorOneCCW_SPEED = MotorOneccwmax;
     }
-    else if (MotorOneCCW_SPEED < ccwmin)
+    else if (MotorOneCCW_SPEED < MotorOneccwmin)
     {
-        MotorOneCCW_SPEED = ccwmin;
+        MotorOneCCW_SPEED = MotorOneccwmin;
     }
 }
 
@@ -709,13 +717,13 @@ void MotorTwoCWPIcontrol()
     pidPWMTwo = MotorTwoCW_SPEED + errorTwoRPM * kp + MotorTwoCWierrorRPM * ki;
     MotorTwoCW_SPEED = pidPWMTwo;
 
-    if(MotorTwoCW_SPEED > cwmax)
+    if(MotorTwoCW_SPEED > MotorTwocwmax)
     {
-        MotorTwoCW_SPEED = cwmax;
+        MotorTwoCW_SPEED = MotorTwocwmax;
     }
-    else if (MotorTwoCW_SPEED < cwmin)
+    else if (MotorTwoCW_SPEED < MotorTwocwmin)
     {
-        MotorTwoCW_SPEED = cwmin;
+        MotorTwoCW_SPEED = MotorTwocwmin;
     }
 }
 
@@ -736,13 +744,13 @@ void MotorTwoCCWPIcontrol()
     pidPWMTwo = MotorTwoCCW_SPEED + errorTwoRPM * kp + MotorTwoCCWierrorRPM * ki;
     MotorTwoCCW_SPEED = pidPWMTwo;
 
-    if(MotorTwoCCW_SPEED > ccwmax)
+    if(MotorTwoCCW_SPEED > MotorTwoccwmax)
     {
-        MotorTwoCCW_SPEED = ccwmax;
+        MotorTwoCCW_SPEED = MotorTwoccwmax;
     }
-    else if (MotorTwoCCW_SPEED < ccwmin)
+    else if (MotorTwoCCW_SPEED < MotorTwoccwmin)
     {
-        MotorTwoCCW_SPEED = ccwmin;
+        MotorTwoCCW_SPEED = MotorTwoccwmin;
     }
 }
 /* USER CODE END */
@@ -848,8 +856,8 @@ int main(void)
                     //PIsave = true;
                     printCounterDisplayOne(mainCounterOne);
 
-                    /*********Run motor forward for 3 secs*********/
-                    if (motorOneTimer <= FORWARD_PHASE_RUNTIME)
+                    /*********Run motor forward for 3 secs & 1900 encoder readings*********/
+                    if (MotorOnePosition < MotorOneFULLCYCLE)
                     {
                         MotorOneMotion = true;
                         SetMotorOneDirection(FORWARD);
@@ -911,8 +919,8 @@ int main(void)
                     //PIsave = true;
                     printCounterDisplayOne(mainCounterOne);
 
-                    /*********Run motor backward for 3.5 secs*********/
-                    if (motorOneTimer <= BACKWARD_PHASE_RUNTIME)
+                    /*********Run motor backward for 3.5 secs & go back to original position*********/
+                    if (MotorOnePosition > 0)
                     {
                         MotorOneMotion = true;
                         SetMotorOneDirection(BACKWARD);
@@ -926,6 +934,7 @@ int main(void)
                             MotorOneCheck = true;
                         }
                     }
+
                     else
                     {
                         startMotorOneTimerFlag = false;
@@ -1007,6 +1016,7 @@ int main(void)
                     startMotorTwoTimerFlag = true;
                     MotorTwoCWPID = false;
                     MotorTwoCCWPID = false;
+                    //PIsave = false;
                     printCounterDisplayTwo(mainCounterTwo);
 
                     /*********Run motor forward for 1.5 secs*********/
@@ -1061,14 +1071,15 @@ int main(void)
                     MotorTwoCCWPID = false;
                     MotorTwoForward = true;
                     MotorTwoBackward = false;
+                    //PIsave = true;
                     printCounterDisplayTwo(mainCounterTwo);
 
                     /*********Run motor forward for 3 secs*********/
-                    if (motorTwoTimer <= FORWARD_PHASE_RUNTIME)
+                    if (MotorTwoPosition < MotorTwoFULLCYCLE)
                     {
                         MotorTwoMotion = true;
                         SetMotorTwoDirection(FORWARD);
-                        SetMotorOneSpeed(MotorTwoCW_SPEED);
+                        SetMotorTwoSpeed(MotorTwoCW_SPEED);
                         MotorTwoCWPID = true;
                         MotorTwoCheck = false;
 
@@ -1101,6 +1112,7 @@ int main(void)
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
                     MotorTwoCheck = false;
+                    //PIsave = true;
                     MotorTwoErrorCounter = 0;
                     printCounterDisplayTwo(mainCounterTwo);
 
@@ -1123,15 +1135,16 @@ int main(void)
                     MotorTwoCWPID = false;
                     MotorTwoForward = false;
                     MotorTwoBackward = true;
+                    //PIsave = true;
                     printCounterDisplayTwo(mainCounterTwo);
 
                     /*********Run motor backward for 3.5 secs*********/
-                    if (motorTwoTimer <= BACKWARD_PHASE_RUNTIME)
+                    if (MotorTwoPosition > 0)
                     {
                         MotorTwoMotion = true;
                         MotorTwoCheck = false;
                         SetMotorTwoDirection(BACKWARD);
-                        SetMotorOneSpeed(MotorTwoCCW_SPEED);
+                        SetMotorTwoSpeed(MotorTwoCCW_SPEED);
                         MotorTwoCCWPID = true;
                         /*********Start error checking 1 sec later*********/
                         if (motorTwoTimer > ERROR_CHECK_TIME && motorTwoTimer < STOPERROR_CHECK_TIME
@@ -1142,6 +1155,7 @@ int main(void)
                             MotorTwoCheck = true;
                         }
                     }
+
                     else
                     {
                         startMotorTwoTimerFlag = false;
@@ -1172,6 +1186,7 @@ int main(void)
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
                     MotorTwoCheck = false;
+                    //PIsave = true;
                     MotorTwoErrorCounter = 0;
                     printCounterDisplayTwo(mainCounterTwo);
                     if (motorTwoTimer <= END_CYCLE_PAUSETIME)
@@ -1195,6 +1210,7 @@ int main(void)
                     MotorTwoForward = false;
                     MotorTwoBackward = false;
                     MotorTwoCheck = false;
+                    //PIsave = false;
                     MotorTwoErrorCounter = 0;
 
                     if (motorTwoTimer <= ERROR_COOLDOWN_TIME)

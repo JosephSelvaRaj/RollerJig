@@ -942,6 +942,7 @@ int main(void)
                             stateMotorOne = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                             MotorOneCWPID = false;
                             MotorOneErrorCounter = 0;
+                            SetMotorOneSpeed(STOP);
                         }
                     }
 
@@ -979,6 +980,7 @@ int main(void)
                             stateMotorTwo = STATE_NORMAL_PHASE_PAUSE; // Transition to next state
                             MotorTwoCWPID = false;
                             MotorTwoCheck = false;
+                            SetMotorTwoSpeed(STOP);
                         }
                     }
 
@@ -1085,6 +1087,7 @@ int main(void)
                             stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                             mainCounterOne++;
                             MotorOneEepromCounter++;
+                            SetMotorOneSpeed(STOP);
                             if (MotorOneEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
                             {
                                 saveCountersToEEPROM();
@@ -1129,6 +1132,7 @@ int main(void)
                             MotorTwoCCWPID = false;
                             MotorTwoCheck = false;
                             MotorTwoErrorCounter = 0;
+                            SetMotorTwoSpeed(STOP);
                             printCounterDisplayTwo(mainCounterTwo);
                             if (MotorTwoEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
                             {
@@ -1143,6 +1147,63 @@ int main(void)
                         BothMotorState == STATE_END_OF_CYCLE_PAUSE;
                     }
                     break;
+
+                case STATE_END_OF_CYCLE_PAUSE:
+                    /*************************Motor 5 sec Pause State*************************/
+                    /******************MOTOR ONE********************/
+                    if(stateMotorOne == STATE_END_OF_CYCLE_PAUSE)
+                    {
+                        startMotorOneTimerFlag = true;
+                        MotorOneCWPID = false;
+                        MotorOneCCWPID = false;
+                        MotorOneMotion = false;
+                        MotorOneForward = false;
+                        MotorOneBackward = false;
+                        MotorOneCheck = false;
+                        MotorOneErrorCounter = 0;
+                        //PIsave = true;
+                        printCounterDisplayOne(mainCounterOne);
+                        if (motorOneTimer <= END_CYCLE_PAUSETIME)
+                        {
+                            SetMotorOneSpeed(STOP);
+                        }
+                        else
+                        {
+                            startMotorOneTimerFlag = false;
+                            motorOneTimer = 0;
+                            stateMotorOne = STATE_FORWARD_PHASE; // Transition to next state
+                        }
+                    }
+                    /******************MOTOR TWO********************/
+                    if(stateMotorTwo == STATE_END_OF_CYCLE_PAUSE)
+                    {
+                        startMotorTwoTimerFlag = true;
+                        MotorTwoCWPID = false;
+                        MotorTwoCCWPID = false;
+                        MotorTwoMotion = false;
+                        MotorTwoForward = false;
+                        MotorTwoBackward = false;
+                        MotorTwoCheck = false;
+                        //PIsave = true;
+                        MotorTwoErrorCounter = 0;
+                        printCounterDisplayTwo(mainCounterTwo);
+                        if (motorTwoTimer <= END_CYCLE_PAUSETIME)
+                        {
+                            SetMotorTwoSpeed(STOP);
+                        }
+                        else
+                        {
+                            startMotorTwoTimerFlag = false;
+                            motorTwoTimer = 0;
+                            stateMotorTwo = STATE_FORWARD_PHASE; // Transition to next state
+                        }
+                    }
+
+                    if(stateMotorOne == STATE_FORWARD_PHASE && stateMotorTwo == STATE_FORWARD_PHASE)
+                    {
+                        BothMotorState = STATE_FORWARD_PHASE;
+                    }
+                break;
 
                 case STATE_ERROR:
                     /***************************Motor Error State***************************/

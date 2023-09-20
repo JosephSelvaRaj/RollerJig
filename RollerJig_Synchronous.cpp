@@ -1,46 +1,46 @@
-/** @file HL_sys_main.c
- *   @brief Application main file
- *   @date 30-06-2023
- *   @version 1.0
- *   Author: SIT Internship Team
- *
- *   This file contains an empty main function,
- *   which can be used for the application.
- */
+/** @file HL_sys_main.c 
+*   @brief Application main file
+*   @date 11-Dec-2018
+*   @version 04.07.01
+*
+*   This file contains an empty main function,
+*   which can be used for the application.
+*/
 
-/*
- * Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com
- *
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *    Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- *    Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
- *
- *    Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
+/* 
+* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com  
+* 
+* 
+*  Redistribution and use in source and binary forms, with or without 
+*  modification, are permitted provided that the following conditions 
+*  are met:
+*
+*    Redistributions of source code must retain the above copyright 
+*    notice, this list of conditions and the following disclaimer.
+*
+*    Redistributions in binary form must reproduce the above copyright
+*    notice, this list of conditions and the following disclaimer in the 
+*    documentation and/or other materials provided with the   
+*    distribution.
+*
+*    Neither the name of Texas Instruments Incorporated nor the names of
+*    its contributors may be used to endorse or promote products derived
+*    from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+*  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+*  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+*  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+*  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+*/
+
 
 /* USER CODE BEGIN (0) */
 /**************************************************NOTES***************************************************************
@@ -208,7 +208,7 @@ bool Pause = false;
 // EEPROM variables
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 #define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U
-const int mainCountersAddress = 0x1U;
+const int mainCountersAddress = 0x2U;
 const int mainCounterAddressOffset = 0U;
 const int mainCounterByteSize = 4U;
 const int mainCountersTotalByteSize = MAIN_COUNTERS_TOTAL_BYTE_SIZE;
@@ -271,12 +271,12 @@ uint8_t TEXT4[TSIZE4] = {'R', 'P', 'M', ':', ' '};
 /* USER CODE END */
 
 /** @fn void main(void)
- *   @brief Application main function
- *   @note This function is empty by default.
- *
- *   This function is called after startup.
- *   The user can use this function to implement the application.
- */
+*   @brief Application main function
+*   @note This function is empty by default.
+*
+*   This function is called after startup.
+*   The user can use this function to implement the application.
+*/
 
 /* USER CODE BEGIN (2) */
 
@@ -758,7 +758,7 @@ void MotorTwoCCWPIcontrol()
 
 int main(void)
 {
-    /* USER CODE BEGIN (3) */
+/* USER CODE BEGIN (3) */
     EEPROMInit();
     hetInit();                                                // Initialize PWM High End Timer Module
     rtiInit();                                                // Initialize Timer Module
@@ -768,6 +768,7 @@ int main(void)
     gioEnableNotification(gioPORTA, MOTORTWOENCODERPIN);      // Enable Pin interrupt
     rtiEnableNotification(rtiREG1, rtiNOTIFICATION_COMPARE0); // Enable timer interrupt
     rtiStartCounter(rtiREG1, rtiCOUNTER_BLOCK0);              // Start timer module
+    //flushEEPROM();                                          // Reset EEPROM
 
     sciInit(); /* initialize sci/sci-lin    */
                /* even parity , 2 stop bits */
@@ -848,14 +849,14 @@ int main(void)
                         }
                     }
                     /******************MOTOR TWO********************/
-                    if(stateMotorTwo == STATE_FIRST_RESET)
+                if(stateMotorTwo == STATE_FIRST_RESET)
                     {
                         startMotorTwoTimerFlag = true;
                         MotorTwoCWPID = false;
                         MotorTwoCCWPID = false;
                         //PIsave = false;
                         printCounterDisplayTwo(mainCounterTwo);
-                    
+
                         /*********Run motor forward for 1.5 secs*********/
                         if (motorTwoTimer <= FIRST_RESET_RUNTIME)
                         {
@@ -909,6 +910,8 @@ int main(void)
 
                 case STATE_FORWARD_PHASE:
                     /***************************Motor Forward State***************************/
+                    printCounterDisplayOne(mainCounterOne);
+                    printCounterDisplayTwo(mainCounterTwo);
                     /******************MOTOR ONE********************/
                     if(stateMotorOne == STATE_FORWARD_PHASE)
                     {
@@ -917,7 +920,6 @@ int main(void)
                         MotorOneForward = true;
                         MotorOneBackward = false;
                         //PIsave = true;
-                        printCounterDisplayOne(mainCounterOne);
 
                         /*********Run motor forward for 3 secs & 1900 encoder readings*********/
                         if (MotorOnePosition < MotorOneFULLCYCLE)
@@ -954,7 +956,6 @@ int main(void)
                         MotorTwoForward = true;
                         MotorTwoBackward = false;
                         //PIsave = true;
-                        printCounterDisplayTwo(mainCounterTwo);
 
                         /*********Run motor forward for 3 secs*********/
                         if (MotorTwoPosition < MotorTwoFULLCYCLE)
@@ -992,8 +993,10 @@ int main(void)
 
                 case STATE_NORMAL_PHASE_PAUSE:
                     /*************************Motor 1 sec Pause State*************************/
+                    printCounterDisplayOne(mainCounterOne);
+                    printCounterDisplayTwo(mainCounterTwo);
                     /******************MOTOR ONE********************/
-                    
+
                     if(stateMotorOne == STATE_NORMAL_PHASE_PAUSE)
                     {
                         startMotorOneTimerFlag = true;
@@ -1005,7 +1008,6 @@ int main(void)
                         MotorOneCheck = false;
                         MotorOneErrorCounter = 0;
                         //PIsave = true;
-                        printCounterDisplayOne(mainCounterOne);
                         if (motorOneTimer <= NORMAL_PHASE_PAUSETIME)
                         {
                             SetMotorOneSpeed(STOP);
@@ -1029,7 +1031,6 @@ int main(void)
                         MotorTwoCheck = false;
                         //PIsave = true;
                         MotorTwoErrorCounter = 0;
-                        printCounterDisplayTwo(mainCounterTwo);
 
                         if (motorTwoTimer <= NORMAL_PHASE_PAUSETIME)
                         {
@@ -1051,7 +1052,9 @@ int main(void)
 
                 case STATE_BACKWARD_PHASE:
                     /***************************Motor Backward State***************************/
-                    /******************MOTOR ONE********************/   
+                    printCounterDisplayOne(mainCounterOne);
+                    printCounterDisplayTwo(mainCounterTwo);
+                    /******************MOTOR ONE********************/
                     if(stateMotorOne == STATE_BACKWARD_PHASE)
                     {
                         startMotorOneTimerFlag = true;
@@ -1059,7 +1062,6 @@ int main(void)
                         MotorOneForward = false;
                         MotorOneBackward = true;
                         //PIsave = true;
-                        printCounterDisplayOne(mainCounterOne);
                         /*********Run motor backward for 3.5 secs & go back to original position*********/
                         if (MotorOnePosition > 0)
                         {
@@ -1103,7 +1105,6 @@ int main(void)
                         MotorTwoForward = false;
                         MotorTwoBackward = true;
                         //PIsave = true;
-                        printCounterDisplayTwo(mainCounterTwo);
 
                         /*********Run motor backward for 3.5 secs*********/
                         if (MotorTwoPosition > 0)
@@ -1133,7 +1134,6 @@ int main(void)
                             MotorTwoCheck = false;
                             MotorTwoErrorCounter = 0;
                             SetMotorTwoSpeed(STOP);
-                            printCounterDisplayTwo(mainCounterTwo);
                             if (MotorTwoEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
                             {
                                 saveCountersToEEPROM();
@@ -1144,12 +1144,14 @@ int main(void)
 
                     if(stateMotorOne == STATE_END_OF_CYCLE_PAUSE && stateMotorTwo == STATE_END_OF_CYCLE_PAUSE)
                     {
-                        BothMotorState == STATE_END_OF_CYCLE_PAUSE;
+                        BothMotorState = STATE_END_OF_CYCLE_PAUSE;
                     }
                     break;
 
                 case STATE_END_OF_CYCLE_PAUSE:
                     /*************************Motor 5 sec Pause State*************************/
+                    printCounterDisplayOne(mainCounterOne);
+                    printCounterDisplayTwo(mainCounterTwo);
                     /******************MOTOR ONE********************/
                     if(stateMotorOne == STATE_END_OF_CYCLE_PAUSE)
                     {
@@ -1162,7 +1164,6 @@ int main(void)
                         MotorOneCheck = false;
                         MotorOneErrorCounter = 0;
                         //PIsave = true;
-                        printCounterDisplayOne(mainCounterOne);
                         if (motorOneTimer <= END_CYCLE_PAUSETIME)
                         {
                             SetMotorOneSpeed(STOP);
@@ -1186,7 +1187,6 @@ int main(void)
                         MotorTwoCheck = false;
                         //PIsave = true;
                         MotorTwoErrorCounter = 0;
-                        printCounterDisplayTwo(mainCounterTwo);
                         if (motorTwoTimer <= END_CYCLE_PAUSETIME)
                         {
                             SetMotorTwoSpeed(STOP);
@@ -1225,7 +1225,6 @@ int main(void)
                             SetMotorOneSpeed(STOP);
                             SetMotorTwoSpeed(STOP);
                             displayErrorMotorOne();
-                            printCounterDisplayTwo(mainCounterTwo);
                         }
                         else
                         {
@@ -1252,7 +1251,6 @@ int main(void)
                             SetMotorOneSpeed(STOP);
                             SetMotorTwoSpeed(STOP);
                             displayErrorMotorTwo();
-                            printCounterDisplayOne(mainCounterOne);
                         }
                         else
                         {
@@ -1264,7 +1262,9 @@ int main(void)
 
                     if(stateMotorOne == STATE_FIRST_RESET || stateMotorTwo == STATE_FIRST_RESET)
                     {
-                        BothMotorState == STATE_FIRST_RESET;
+                        BothMotorState = STATE_FIRST_RESET;
+                        stateMotorOne = STATE_FIRST_RESET;
+                        stateMotorTwo = STATE_FIRST_RESET;
                     }
                     break;
 
@@ -1319,6 +1319,7 @@ int main(void)
 
     return 0;
 }
+
 
 /* USER CODE BEGIN (4) */
 

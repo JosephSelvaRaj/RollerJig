@@ -121,12 +121,12 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
-uint32_t MotorOneCW_SPEED = 65;
-uint32_t MotorOneCCW_SPEED = 59;
+uint32_t MotorOneCW_SPEED = 75;
+uint32_t MotorOneCCW_SPEED = 69;
 uint32_t MotorTwoCW_SPEED = 65;
 uint32_t MotorTwoCCW_SPEED = 59;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
-#define MotorOneFULLCYCLE 1900U
+#define MotorOneFULLCYCLE 1990U
 #define MotorTwoFULLCYCLE 1900U
 
 
@@ -150,16 +150,18 @@ float64 kp = 0.005;
 float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
-int CWtargetRPM = 2400;
-int CCWtargetRPM = 1800;
+int MotorOneCWtargetRPM = 2800;
+int MotorOneCCWtargetRPM = 2200;
+int MotorTwoCWtargetRPM = 2400;
+int MotorTwoCCWtargetRPM = 1800;
 int errorRPM = 0;
 int errorTwoRPM = 0;
 int pidPWM = 0;
 int pidPWMTwo = 0;
-int MotorOnecwmax = 65U;
-int MotorOnecwmin = 59U;
-int MotorOneccwmax = 65U;
-int MotorOneccwmin = 59U;
+int MotorOnecwmax = 75U;
+int MotorOnecwmin = 69U;
+int MotorOneccwmax = 75U;
+int MotorOneccwmin = 69U;
 
 int MotorTwocwmax = 65U;
 int MotorTwocwmin = 59U;
@@ -650,7 +652,7 @@ void wait(uint32 time)
 void MotorOneCWPIcontrol()
 {
     //P Control
-    errorRPM = CWtargetRPM - rpmOne;
+    errorRPM = MotorOneCWtargetRPM - rpmOne;
     //I Control
     MotorOneCWierrorRPM += errorRPM;
     if(MotorOneCWierrorRPM > imax)
@@ -677,7 +679,7 @@ void MotorOneCWPIcontrol()
 void MotorOneCCWPIcontrol()
 {
     //P Control
-    errorRPM = CCWtargetRPM - rpmOne;
+    errorRPM = MotorOneCCWtargetRPM - rpmOne;
     //I Control
     MotorOneCCWierrorRPM += errorRPM;
     if(MotorOneCCWierrorRPM > imax)
@@ -704,7 +706,7 @@ void MotorOneCCWPIcontrol()
 void MotorTwoCWPIcontrol()
 {
     //P Control
-    errorTwoRPM = CWtargetRPM - rpmTwo;
+    errorTwoRPM = MotorTwoCWtargetRPM - rpmTwo;
     //I Control
     MotorTwoCWierrorRPM += errorTwoRPM;
     if(MotorTwoCWierrorRPM > imax)
@@ -731,7 +733,7 @@ void MotorTwoCWPIcontrol()
 void MotorTwoCCWPIcontrol()
 {
     //P Control
-    errorTwoRPM = CCWtargetRPM - rpmTwo;
+    errorTwoRPM = MotorTwoCCWtargetRPM - rpmTwo;
     //I Control
     MotorTwoCCWierrorRPM += errorTwoRPM;
     if(MotorTwoCCWierrorRPM > imax)
@@ -773,7 +775,8 @@ int main(void)
     sciInit(); /* initialize sci/sci-lin    */
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
-    StartMotorsPWM(); // Start PWM output & motor
+    StartMotorsPWM(); // Start PWM output & motor;
+
 
     while (1)
     {

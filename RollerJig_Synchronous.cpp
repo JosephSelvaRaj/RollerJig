@@ -122,11 +122,11 @@
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
 uint32_t MotorOneCW_SPEED = 75;
-uint32_t MotorOneCCW_SPEED = 69;
+uint32_t MotorOneCCW_SPEED = 75;
 uint32_t MotorTwoCW_SPEED = 65;
 uint32_t MotorTwoCCW_SPEED = 59;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
-#define MotorOneFULLCYCLE 1990U
+#define MotorOneFULLCYCLE 1900U
 #define MotorTwoFULLCYCLE 1900U
 
 
@@ -151,7 +151,7 @@ float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
 int MotorOneCWtargetRPM = 2800;
-int MotorOneCCWtargetRPM = 2200;
+int MotorOneCCWtargetRPM = 2400;
 int MotorTwoCWtargetRPM = 2400;
 int MotorTwoCCWtargetRPM = 1800;
 int errorRPM = 0;
@@ -161,7 +161,7 @@ int pidPWMTwo = 0;
 int MotorOnecwmax = 75U;
 int MotorOnecwmin = 69U;
 int MotorOneccwmax = 75U;
-int MotorOneccwmin = 69U;
+int MotorOneccwmin = 70U;
 
 int MotorTwocwmax = 65U;
 int MotorTwocwmin = 59U;
@@ -210,7 +210,7 @@ bool Pause = false;
 // EEPROM variables
 #define EEPROM_SAVING_CYCLE_INTERVAL 12U // Save to EEPROM every 12 cycles
 #define MAIN_COUNTERS_TOTAL_BYTE_SIZE 8U
-const int mainCountersAddress = 0x2U;
+const int mainCountersAddress = 0x3;
 const int mainCounterAddressOffset = 0U;
 const int mainCounterByteSize = 4U;
 const int mainCountersTotalByteSize = MAIN_COUNTERS_TOTAL_BYTE_SIZE;
@@ -776,7 +776,6 @@ int main(void)
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
     StartMotorsPWM(); // Start PWM output & motor;
-
 
     while (1)
     {

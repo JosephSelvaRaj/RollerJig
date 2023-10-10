@@ -121,8 +121,8 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
-uint32_t MotorOneCW_SPEED = 75;
-uint32_t MotorOneCCW_SPEED = 75;
+uint32_t MotorOneCW_SPEED = 65;
+uint32_t MotorOneCCW_SPEED = 60;
 uint32_t MotorTwoCW_SPEED = 65;
 uint32_t MotorTwoCCW_SPEED = 59;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
@@ -150,18 +150,18 @@ float64 kp = 0.005;
 float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
-int MotorOneCWtargetRPM = 2800;
-int MotorOneCCWtargetRPM = 2400;
+int MotorOneCWtargetRPM = 2200;
+int MotorOneCCWtargetRPM = 2000;
 int MotorTwoCWtargetRPM = 2400;
 int MotorTwoCCWtargetRPM = 1800;
 int errorRPM = 0;
 int errorTwoRPM = 0;
 int pidPWM = 0;
 int pidPWMTwo = 0;
-int MotorOnecwmax = 75U;
-int MotorOnecwmin = 69U;
-int MotorOneccwmax = 75U;
-int MotorOneccwmin = 70U;
+int MotorOnecwmax = 65U;
+int MotorOnecwmin = 60U;
+int MotorOneccwmax = 65U;
+int MotorOneccwmin = 60U;
 
 int MotorTwocwmax = 65U;
 int MotorTwocwmin = 59U;
@@ -227,8 +227,8 @@ enum MotorState
 
 uint32_t mainCounterOne = 0;
 uint32_t mainCounterTwo = 0;
-int MotorOneEepromCounter = 0;
-int MotorTwoEepromCounter = 0;
+uint32_t MotorOneEepromCounter = 0;
+uint32_t MotorTwoEepromCounter = 0;
 
 int stateMotorOne = STATE_FIRST_RESET;
 int stateMotorTwo = STATE_FIRST_RESET;
@@ -776,7 +776,8 @@ int main(void)
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
     StartMotorsPWM(); // Start PWM output & motor;
-
+    //mainCounterOne = 0;
+    //mainCounterTwo = 104036;
     while (1)
     {
 //      if (RPMPrint)

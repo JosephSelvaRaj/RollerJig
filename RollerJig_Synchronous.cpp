@@ -121,9 +121,9 @@
 #define SLOW 40U
 #define FAST 70U
 #define FIRST_RESET_SPEED 99U
-uint32_t MotorOneCW_SPEED = 65;
+uint32_t MotorOneCW_SPEED = 80;
 uint32_t MotorOneCCW_SPEED = 60;
-uint32_t MotorTwoCW_SPEED = 65;
+uint32_t MotorTwoCW_SPEED = 80;
 uint32_t MotorTwoCCW_SPEED = 59;
 #define MIN_CONSTSPEED_MOTOR_SPEED_RPM 200U
 #define MotorOneFULLCYCLE 1900U
@@ -140,6 +140,8 @@ uint32_t MotorTwoCCW_SPEED = 59;
 #define STOPERROR_CHECK_TIME 40U    // 2 sec
 #define ERROR_COOLDOWN_TIME 12000U   // 10 Minutes(600,000 * 50ms)
 #define PAUSE_SAVING 1200U           // 1 Minute
+#define Blink_Pause 100U          //5 Seconds
+#define Blink_Counter 200U            //10 Seconds
 
 // Motor RPM variables
 #define PULSES_PER_ROTATION 12U
@@ -150,7 +152,7 @@ float64 kp = 0.005;
 float64 ki = 0.0005;
 int imax = 3000;
 int imin = -3000;
-int MotorOneCWtargetRPM = 2200;
+int MotorOneCWtargetRPM = 2600;
 int MotorOneCCWtargetRPM = 2000;
 int MotorTwoCWtargetRPM = 2400;
 int MotorTwoCCWtargetRPM = 1800;
@@ -158,14 +160,14 @@ int errorRPM = 0;
 int errorTwoRPM = 0;
 int pidPWM = 0;
 int pidPWMTwo = 0;
-int MotorOnecwmax = 65U;
+int MotorOnecwmax = 80U;
 int MotorOnecwmin = 60U;
-int MotorOneccwmax = 65U;
+int MotorOneccwmax = 80U;
 int MotorOneccwmin = 60U;
 
-int MotorTwocwmax = 65U;
+int MotorTwocwmax = 80U;
 int MotorTwocwmin = 59U;
-int MotorTwoccwmax = 65U;
+int MotorTwoccwmax = 80U;
 int MotorTwoccwmin = 59U;
 int MotorOneCWierrorRPM = 0;
 int MotorOneCCWierrorRPM = 0;
@@ -205,6 +207,7 @@ volatile long MotorTwoPosition = 0U;
 
 //Pause Timer Variable
 volatile int PauseTimer = 0;
+volatile int BlinkTimer =0;
 bool Pause = false;
 
 // EEPROM variables
@@ -776,8 +779,8 @@ int main(void)
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
     StartMotorsPWM(); // Start PWM output & motor;
-    //mainCounterOne = 0;
-    //mainCounterTwo = 104036;
+    //mainCounterOne = 5746;
+    //mainCounterTwo = 109783;
     while (1)
     {
 //      if (RPMPrint)
@@ -1089,7 +1092,6 @@ int main(void)
                             MotorOneCheck = false;
                             MotorOnePosition = 0;
                             MotorOneErrorCounter = 0;
-                            stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                             mainCounterOne++;
                             MotorOneEepromCounter++;
                             SetMotorOneSpeed(STOP);
@@ -1097,7 +1099,9 @@ int main(void)
                             {
                                 saveCountersToEEPROM();
                                 MotorOneEepromCounter = 0;
-                            }
+                            };
+                            stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
+
                         }
                     }
                     /******************MOTOR TWO********************/
@@ -1129,7 +1133,6 @@ int main(void)
                         {
                             startMotorTwoTimerFlag = false;
                             motorTwoTimer = 0;
-                            stateMotorTwo = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                             mainCounterTwo++;
                             MotorTwoEepromCounter++;
                             MotorTwoPosition = 0;
@@ -1142,6 +1145,7 @@ int main(void)
                                 saveCountersToEEPROM();
                                 MotorTwoEepromCounter = 0;
                             }
+                            stateMotorTwo = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                         }
                     }
 
@@ -1282,9 +1286,6 @@ int main(void)
             // Stop motors
             SetMotorOneSpeed(STOP);
             SetMotorTwoSpeed(STOP);
-            // Update display to prevent flickering
-            printPauseDisplayOne(PAUSE);
-            printPauseDisplayTwo(PAUSE);
             // off all flags
             MotorOneCWPID = false;
             MotorOneCCWPID = false;
@@ -1310,6 +1311,22 @@ int main(void)
             if(PauseTimer == PAUSE_SAVING)
             {
                 saveCountersToEEPROM();
+            }
+            if(BlinkTimer <= Blink_Pause)
+            {
+                // Update display to prevent flickering
+                printPauseDisplayOne(PAUSE);
+                printPauseDisplayTwo(PAUSE);
+            }
+            else if(BlinkTimer <= Blink_Counter)
+            {
+                // Update display to prevent flickering
+                printCounterDisplayOne(mainCounterOne);
+                printCounterDisplayTwo(mainCounterTwo);
+            }
+            else
+            {
+                BlinkTimer = 0;
             }
         }
 
@@ -1394,10 +1411,12 @@ void rtiNotification(rtiBASE_t *rtiREG, uint32 notification)
     if (Pause)
     {
         PauseTimer++;
+        BlinkTimer++;
     }
     else
     {
         PauseTimer = 0;
+        BlinkTimer = 0;
     }
     /**************************Error Check*************************/
     if(MotorOneCheck)

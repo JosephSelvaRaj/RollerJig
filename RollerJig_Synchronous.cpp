@@ -779,8 +779,10 @@ int main(void)
                /* even parity , 2 stop bits */
     loadCountersFromEEPROM();
     StartMotorsPWM(); // Start PWM output & motor;
-    //mainCounterOne = 5746;
-    //mainCounterTwo = 109783;
+    //mainCounterOne = 60083;
+    //mainCounterTwo = 164120;
+    //saveCountersToEEPROM();
+
     while (1)
     {
 //      if (RPMPrint)
@@ -1093,12 +1095,12 @@ int main(void)
                             MotorOnePosition = 0;
                             MotorOneErrorCounter = 0;
                             mainCounterOne++;
-                            MotorOneEepromCounter++;
+                            //MotorOneEepromCounter++;
                             SetMotorOneSpeed(STOP);
-                            if (MotorOneEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
+                            if ((mainCounterOne % EEPROM_SAVING_CYCLE_INTERVAL == 0) && (mainCounterOne != 0))
                             {
                                 saveCountersToEEPROM();
-                                MotorOneEepromCounter = 0;
+                                //MotorOneEepromCounter = 0;
                             };
                             stateMotorOne = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
 
@@ -1134,16 +1136,16 @@ int main(void)
                             startMotorTwoTimerFlag = false;
                             motorTwoTimer = 0;
                             mainCounterTwo++;
-                            MotorTwoEepromCounter++;
+                            //MotorTwoEepromCounter++;
                             MotorTwoPosition = 0;
                             MotorTwoCCWPID = false;
                             MotorTwoCheck = false;
                             MotorTwoErrorCounter = 0;
                             SetMotorTwoSpeed(STOP);
-                            if (MotorTwoEepromCounter % EEPROM_SAVING_CYCLE_INTERVAL == 0)
+                            if ((mainCounterTwo % EEPROM_SAVING_CYCLE_INTERVAL == 0) && (mainCounterTwo != 0))
                             {
                                 saveCountersToEEPROM();
-                                MotorTwoEepromCounter = 0;
+                                //MotorTwoEepromCounter = 0;
                             }
                             stateMotorTwo = STATE_END_OF_CYCLE_PAUSE; // Transition to next state
                         }
@@ -1311,6 +1313,8 @@ int main(void)
             if(PauseTimer == PAUSE_SAVING)
             {
                 saveCountersToEEPROM();
+                //MotorOneEepromCounter = 0;
+                //MotorTwoEepromCounter = 0;
             }
             if(BlinkTimer <= Blink_Pause)
             {
